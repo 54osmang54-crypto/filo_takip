@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filo ve İşletme Yönetim Sistemi</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen pb-12">
+
+    <!-- LOGIN OVERLAY -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 p-8 max-w-md w-full">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-truck-monster text-white text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900">Filo Yönetim Sistemi</h2>
+                <p class="text-xs text-slate-500 mt-1">Lütfen devam etmek için şifrenizi girin</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">GİRİŞ ŞİFRESİ</label>
+                    <input type="password" id="loginPassword" required autofocus placeholder="••••" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition text-center tracking-widest text-lg font-bold">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-blue-600/30">
+                    Sisteme Giriş Yap
+                </button>
+                <p class="text-center text-xs text-slate-400 mt-2">Varsayılan Şifre: <span class="font-mono font-bold text-slate-600">1234</span></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- HEADER / NAVBAR -->
+    <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-bold text-lg shadow-md shadow-blue-500/20">
+                    <i class="fa-solid fa-bus"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">FiloMetrik Özelleştirilmiş Sistem</h1>
+                    <p class="text-xs text-slate-400">Esnek Vardiya, Ciro ve Gider Takibi</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="lockSystem()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-lock"></i> <span class="hidden sm:inline">Kilitle</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 mt-6 space-y-6">
+
+        <!-- AY SEÇİMİ VE GENEL ÖZET (AY SONU BİLANÇOSU) -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Ay Sonu Genel Bilançosu</h2>
+                    <p class="text-xs text-slate-500">Cirolar ve masraflar birbirinden bağımsız hesaplanır</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label class="text-xs font-semibold text-slate-600">İnceleme Dönemi:</label>
+                    <input type="month" id="selectedMonth" onchange="renderAll()" class="border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-semibold text-blue-600 outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- KPI KARTLARI -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-6">
+                <!-- Toplam Ciro -->
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                    <div class="flex justify-between items-center text-emerald-700 text-xs font-bold mb-1">
+                        <span>TOPLAM CİRO</span>
+                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
+                    </div>
+                    <div id="kpiGrossRevenue" class="text-2xl font-extrabold text-emerald-800">₺0</div>
+                    <span class="text-[10px] text-emerald-600 font-medium">Tüm Araçların Yekünü</span>
+                </div>
+
+                <!-- Akaryakıt Masrafı -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <div class="flex justify-between items-center text-amber-700 text-xs font-bold mb-1">
+                        <span>AKARYAKIT TOPLAMI</span>
+                        <i class="fa-solid fa-gas-pump"></i>
+                    </div>
+                    <div id="kpiFuelCost" class="text-2xl font-extrabold text-amber-800">₺0</div>
+                    <span class="text-[10px] text-amber-600 font-medium">Plaka Bazlı Toplam</span>
+                </div>
+
+                <!-- Sanayi & Parça Masrafı -->
+                <div class="bg-rose-50 border border-rose-200 rounded-xl p-4">
+                    <div class="flex justify-between items-center text-rose-700 text-xs font-bold mb-1">
+                        <span>SANAYİ / PARÇA</span>
+                        <i class="fa-solid fa-wrench"></i>
+                    </div>
+                    <div id="kpiMaintenanceCost" class="text-2xl font-extrabold text-rose-800">₺0</div>
+                    <span class="text-[10px] text-rose-600 font-medium">Bakım ve Tamirler</span>
+                </div>
+
+                <!-- Vergi / Muhasebe / Kira -->
+                <div class="bg-purple-50 border border-purple-200 rounded-xl p-4">
+                    <div class="flex justify-between items-center text-purple-700 text-xs font-bold mb-1">
+                        <span>VERGİ / KİRA / MUH.</span>
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div id="kpiFixedCost" class="text-2xl font-extrabold text-purple-800">₺0</div>
+                    <span class="text-[10px] text-purple-600 font-medium">Sabit Resmi Ödemeler</span>
+                </div>
+
+                <!-- Ay Sonu Net Kâr -->
+                <div class="bg-blue-600 text-white rounded-xl p-4 shadow-lg shadow-blue-600/30">
+                    <div class="flex justify-between items-center text-blue-100 text-xs font-bold mb-1">
+                        <span>AY SONU NET KÂR</span>
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div id="kpiNetProfit" class="text-2xl font-extrabold text-white">₺0</div>
+                    <span class="text-[10px] text-blue-200 font-medium">Ciro - Tüm Masraflar</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- HIZLI VERİ GİRİŞ FORMLARI (TABLAR) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <!-- TAB HEADERS -->
+            <div class="flex border-b border-slate-200 bg-slate-50 text-sm font-medium overflow-x-auto">
+                <button onclick="switchTab('tab-revenue')" id="btn-tab-revenue" class="tab-btn px-6 py-3.5 border-b-2 border-blue-600 text-blue-600 font-bold flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-cash-register"></i> Günlük Ciro İşle
+                </button>
+                <button onclick="switchTab('tab-fuel')" id="btn-tab-fuel" class="tab-btn px-6 py-3.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-gas-pump"></i> Akaryakıt İşle
+                </button>
+                <button onclick="switchTab('tab-maintenance')" id="btn-tab-maintenance" class="tab-btn px-6 py-3.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-wrench"></i> Sanayi & Parça
+                </button>
+                <button onclick="switchTab('tab-fixed')" id="btn-tab-fixed" class="tab-btn px-6 py-3.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Vergi, Muhasebe & Kira
+                </button>
+                <button onclick="switchTab('tab-settings')" id="btn-tab-settings" class="tab-btn px-6 py-3.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-sliders"></i> Araç & Şoför Tanımları
+                </button>
+            </div>
+
+            <!-- TAB CONTENTS -->
+            <div class="p-6">
+                <!-- 1. GÜNLÜK CİRO FORMU -->
+                <div id="tab-revenue" class="tab-content">
+                    <form onsubmit="addRevenue(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tarih</label>
+                            <input type="date" id="revDate" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Araç Plakası</label>
+                            <select id="revVehicle" required class="w-full px-3 py-2 border rounded-lg text-sm vehicle-select">
+                                <!-- JS ile doldurulacak -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Vardiyadaki Şoför</label>
+                            <select id="revDriver" required class="w-full px-3 py-2 border rounded-lg text-sm driver-select">
+                                <!-- JS ile doldurulacak -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Günlük Ciro (₺)</label>
+                            <input type="number" step="0.01" id="revAmount" required placeholder="0.00" class="w-full px-3 py-2 border rounded-lg text-sm font-semibold text-emerald-700">
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm transition">
+                                <i class="fa-solid fa-plus mr-1"></i> Ciro Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 2. AKARYAKIT FORMU -->
+                <div id="tab-fuel" class="tab-content hidden">
+                    <form onsubmit="addFuel(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tarih</label>
+                            <input type="date" id="fuelDate" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Araç Plakası</label>
+                            <select id="fuelVehicle" required class="w-full px-3 py-2 border rounded-lg text-sm vehicle-select">
+                                <!-- JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Akaryakıt Tutarı (₺)</label>
+                            <input type="number" step="0.01" id="fuelAmount" required placeholder="0.00" class="w-full px-3 py-2 border rounded-lg text-sm font-semibold text-amber-700">
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 rounded-lg text-sm transition">
+                                <i class="fa-solid fa-gas-pump mr-1"></i> Yakıt Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 3. SANAYİ VE PARÇA FORMU -->
+                <div id="tab-maintenance" class="tab-content hidden">
+                    <form onsubmit="addMaintenance(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tarih</label>
+                            <input type="date" id="maintDate" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Araç Plakası</label>
+                            <select id="maintVehicle" required class="w-full px-3 py-2 border rounded-lg text-sm vehicle-select">
+                                <!-- JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Yapılan İşlem / Parça</label>
+                            <input type="text" id="maintDesc" required placeholder="Örn: Yağ değişimi, Ön balata" class="w-full px-3 py-2 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tutar (₺)</label>
+                            <input type="number" step="0.01" id="maintAmount" required placeholder="0.00" class="w-full px-3 py-2 border rounded-lg text-sm font-semibold text-rose-700">
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-medium py-2 rounded-lg text-sm transition">
+                                <i class="fa-solid fa-wrench mr-1"></i> Masraf Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 4. VERGİ, MUHASEBE VE KİRA FORMU -->
+                <div id="tab-fixed" class="tab-content hidden">
+                    <form onsubmit="addFixedExpense(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tarih</label>
+                            <input type="date" id="fixedDate" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">İlişkili Araç (İsteğe Bağlı)</label>
+                            <select id="fixedVehicle" class="w-full px-3 py-2 border rounded-lg text-sm vehicle-select">
+                                <option value="">-- Genel İşletme Gideri --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Gider Türü / Açıklama</label>
+                            <input type="text" id="fixedDesc" required placeholder="Örn: Dükkan Kirası, Muhasebe, Bandrol" class="w-full px-3 py-2 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tutar (₺)</label>
+                            <input type="number" step="0.01" id="fixedAmount" required placeholder="0.00" class="w-full px-3 py-2 border rounded-lg text-sm font-semibold text-purple-700">
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 rounded-lg text-sm transition">
+                                <i class="fa-solid fa-building-columns mr-1"></i> Gider Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 5. ARAÇ VE ŞOFÖR TANIMLARI -->
+                <div id="tab-settings" class="tab-content hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Araç Yönetimi -->
+                        <div class="space-y-4">
+                            <h3 class="font-bold text-slate-800 text-sm border-b pb-2"><i class="fa-solid fa-truck mr-1"></i> Araç / Plaka Tanımları</h3>
+                            <form onsubmit="addVehicle(event)" class="flex gap-2">
+                                <input type="text" id="newPlaca" required placeholder="Örn: 54 M 0001" class="uppercase border px-3 py-1.5 rounded-lg text-sm flex-1">
+                                <button type="submit" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700">Ekle</button>
+                            </form>
+                            <ul id="vehicleList" class="divide-y border rounded-lg max-h-48 overflow-y-auto"></ul>
+                        </div>
+
+                        <!-- Şoför Yönetimi -->
+                        <div class="space-y-4">
+                            <h3 class="font-bold text-slate-800 text-sm border-b pb-2"><i class="fa-solid fa-users mr-1"></i> Şoför Tanımları</h3>
+                            <form onsubmit="addDriver(event)" class="flex gap-2">
+                                <input type="text" id="newDriverName" required placeholder="Örn: Ahmet Yılmaz" class="border px-3 py-1.5 rounded-lg text-sm flex-1">
+                                <button type="submit" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700">Ekle</button>
+                            </form>
+                            <ul id="driverList" class="divide-y border rounded-lg max-h-48 overflow-y-auto"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ARAÇ BAZLI YEKÜN RAPORU -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-chart-pie text-blue-600"></i> Seçili Ay İçin Araç Bazlı Yekün Tablosu
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b bg-slate-50 text-xs font-semibold text-slate-500 uppercase">
+                            <th class="p-3">Araç Plaka</th>
+                            <th class="p-3 text-emerald-700">Toplam Ciro (Yekün)</th>
+                            <th class="p-3 text-amber-700">Toplam Akaryakıt</th>
+                            <th class="p-3 text-rose-700">Sanayi / Parça</th>
+                            <th class="p-3 text-purple-700">Araç Vergi / Bandrol</th>
+                            <th class="p-3 text-blue-800">Araç Net Katkısı</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehicleSummaryTable" class="divide-y text-sm font-medium text-slate-700">
+                        <!-- JS Dolduracak -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HAREKET DÖKÜMÜ / KAYIT GEÇMİŞİ TABLOLARI -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Ciro Geçmişi -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-bold text-slate-900 mb-3 text-sm flex justify-between items-center">
+                    <span><i class="fa-solid fa-list text-emerald-600 mr-1"></i> Günlük Ciro Kayıtları</span>
+                    <span id="revCount" class="text-xs bg-slate-100 px-2 py-0.5 rounded-full font-normal">0 Kayıt</span>
+                </h3>
+                <div class="overflow-y-auto max-h-60">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b text-slate-500">
+                            <tr>
+                                <th class="p-2">Tarih</th>
+                                <th class="p-2">Plaka</th>
+                                <th class="p-2">Şoför</th>
+                                <th class="p-2 text-right">Ciro</th>
+                                <th class="p-2 text-center">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="revenueTable" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Akaryakıt Geçmişi -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-bold text-slate-900 mb-3 text-sm flex justify-between items-center">
+                    <span><i class="fa-solid fa-list text-amber-600 mr-1"></i> Akaryakıt Kayıtları</span>
+                    <span id="fuelCount" class="text-xs bg-slate-100 px-2 py-0.5 rounded-full font-normal">0 Kayıt</span>
+                </h3>
+                <div class="overflow-y-auto max-h-60">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b text-slate-500">
+                            <tr>
+                                <th class="p-2">Tarih</th>
+                                <th class="p-2">Plaka</th>
+                                <th class="p-2 text-right">Tutar</th>
+                                <th class="p-2 text-center">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fuelTable" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sanayi / Parça Geçmişi -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-bold text-slate-900 mb-3 text-sm flex justify-between items-center">
+                    <span><i class="fa-solid fa-list text-rose-600 mr-1"></i> Sanayi & Parça Kayıtları</span>
+                    <span id="maintCount" class="text-xs bg-slate-100 px-2 py-0.5 rounded-full font-normal">0 Kayıt</span>
+                </h3>
+                <div class="overflow-y-auto max-h-60">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b text-slate-500">
+                            <tr>
+                                <th class="p-2">Tarih</th>
+                                <th class="p-2">Plaka</th>
+                                <th class="p-2">İşlem</th>
+                                <th class="p-2 text-right">Tutar</th>
+                                <th class="p-2 text-center">Sil</th>
+                            </tr>
+                        </thead>
+                        <tbody id="maintTable" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Vergi / Muhasebe / Kira Geçmişi -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-bold text-slate-900 mb-3 text-sm flex justify-between items-center">
+                    <span><i class="fa-solid fa-list text-purple-600 mr-1"></i> Vergi, Muhasebe & Kira Kayıtları</span>
+                    <span id="fixedCount" class="text-xs bg-slate-100 px-2 py-0.5 rounded-full font-normal">0 Kayıt</span>
+                </h3>
+                <div class="overflow-y-auto max-h-60">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b text-slate-500">
+                            <tr>
+                                <th class="p-2">Tarih</th>
+                                <th class="p-2">Açıklama / Araç</th>
+                                <th class="p-2 text-right">Tutar</th>
+                                <th class="p-2 text-center">Sil</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fixedTable" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- SCRIPT APPLICATION LOGIC -->
+    <script>
+        // DATA STRUCTURE & LOCAL STORAGE
+        const STORAGE_KEY = 'filo_custom_app_db_v2';
+        
+        let db = {
+            vehicles: [],
+            drivers: [],
+            revenues: [],
+            fuels: [],
+            maintenances: [],
+            fixedExpenses: []
+        };
+
+        // INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDatabase();
+            
+            // Set current month in picker
+            const now = new Date();
+            const yearMonth = now.toISOString().slice(0, 7);
+            document.getElementById('selectedMonth').value = yearMonth;
+
+            // Set today's date in input fields
+            const today = now.toISOString().slice(0, 10);
+            document.getElementById('revDate').value = today;
+            document.getElementById('fuelDate').value = today;
+            document.getElementById('maintDate').value = today;
+            document.getElementById('fixedDate').value = today;
+
+            renderAll();
+        });
+
+        function loadDatabase() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    db = JSON.parse(saved);
+                } catch(e) { console.error('DB Yükleme hatası', e); }
+            }
+        }
+
+        function saveDatabase() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+            renderAll();
+        }
+
+        // AUTHENTICATION
+        function handleLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('loginPassword').value;
+            if (pass === '1234') {
+                document.getElementById('loginOverlay').classList.add('hidden');
+            } else {
+                alert('Hatalı Şifre!');
+            }
+        }
+
+        function lockSystem() {
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginOverlay').classList.remove('hidden');
+        }
+
+        // TAB NAVIGATION
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('border-blue-600', 'text-blue-600', 'font-bold');
+                el.classList.add('border-transparent', 'text-slate-500');
+            });
+
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('border-blue-600', 'text-blue-600', 'font-bold');
+            activeBtn.classList.remove('border-transparent', 'text-slate-500');
+        }
+
+        // ADD DATA FUNCTIONS
+        function addVehicle(e) {
+            e.preventDefault();
+            const placa = document.getElementById('newPlaca').value.trim().toUpperCase();
+            if (placa && !db.vehicles.includes(placa)) {
+                db.vehicles.push(placa);
+                document.getElementById('newPlaca').value = '';
+                saveDatabase();
+            }
+        }
+
+        function removeVehicle(placa) {
+            if (confirm(`${placa} plakalı aracı silmek istediğinize emin misiniz?`)) {
+                db.vehicles = db.vehicles.filter(v => v !== placa);
+                saveDatabase();
+            }
+        }
+
+        function addDriver(e) {
+            e.preventDefault();
+            const name = document.getElementById('newDriverName').value.trim();
+            if (name && !db.drivers.includes(name)) {
+                db.drivers.push(name);
+                document.getElementById('newDriverName').value = '';
+                saveDatabase();
+            }
+        }
+
+        function removeDriver(name) {
+            if (confirm(`${name} isimli şoförü silmek istediğinize emin misiniz?`)) {
+                db.drivers = db.drivers.filter(d => d !== name);
+                saveDatabase();
+            }
+        }
+
+        function addRevenue(e) {
+            e.preventDefault();
+            db.revenues.push({
+                id: Date.now(),
+                date: document.getElementById('revDate').value,
+                vehicle: document.getElementById('revVehicle').value,
+                driver: document.getElementById('revDriver').value,
+                amount: parseFloat(document.getElementById('revAmount').value) || 0
+            });
+            document.getElementById('revAmount').value = '';
+            saveDatabase();
+        }
+
+        function addFuel(e) {
+            e.preventDefault();
+            db.fuels.push({
+                id: Date.now(),
+                date: document.getElementById('fuelDate').value,
+                vehicle: document.getElementById('fuelVehicle').value,
+                amount: parseFloat(document.getElementById('fuelAmount').value) || 0
+            });
+            document.getElementById('fuelAmount').value = '';
+            saveDatabase();
+        }
+
+        function addMaintenance(e) {
+            e.preventDefault();
+            db.maintenances.push({
+                id: Date.now(),
+                date: document.getElementById('maintDate').value,
+                vehicle: document.getElementById('maintVehicle').value,
+                description: document.getElementById('maintDesc').value,
+                amount: parseFloat(document.getElementById('maintAmount').value) || 0
+            });
+            document.getElementById('maintDesc').value = '';
+            document.getElementById('maintAmount').value = '';
+            saveDatabase();
+        }
+
+        function addFixedExpense(e) {
+            e.preventDefault();
+            db.fixedExpenses.push({
+                id: Date.now(),
+                date: document.getElementById('fixedDate').value,
+                vehicle: document.getElementById('fixedVehicle').value,
+                description: document.getElementById('fixedDesc').value,
+                amount: parseFloat(document.getElementById('fixedAmount').value) || 0
+            });
+            document.getElementById('fixedDesc').value = '';
+            document.getElementById('fixedAmount').value = '';
+            saveDatabase();
+        }
+
+        function deleteItem(collection, id) {
+            if (confirm('Bu kaydı silmek istediğinize emin misiniz?')) {
+                db[collection] = db[collection].filter(item => item.id !== id);
+                saveDatabase();
+            }
+        }
+
+        // RENDER LOGIC
+        function renderAll() {
+            const selectedMonth = document.getElementById('selectedMonth').value;
+
+            renderSelectOptions();
+            renderSettingsLists();
+            
+            // Filter Data by selected month
+            const revs = db.revenues.filter(r => r.date.startsWith(selectedMonth));
+            const fuels = db.fuels.filter(f => f.date.startsWith(selectedMonth));
+            const maints = db.maintenances.filter(m => m.date.startsWith(selectedMonth));
+            const fixeds = db.fixedExpenses.filter(x => x.date.startsWith(selectedMonth));
+
+            // Totals
+            const totalRev = revs.reduce((sum, item) => sum + item.amount, 0);
+            const totalFuel = fuels.reduce((sum, item) => sum + item.amount, 0);
+            const totalMaint = maints.reduce((sum, item) => sum + item.amount, 0);
+            const totalFixed = fixeds.reduce((sum, item) => sum + item.amount, 0);
+            const netProfit = totalRev - (totalFuel + totalMaint + totalFixed);
+
+            // KPI Cards
+            document.getElementById('kpiGrossRevenue').innerText = '₺' + totalRev.toLocaleString('tr-TR', {minimumFractionDigits: 2});
+            document.getElementById('kpiFuelCost').innerText = '₺' + totalFuel.toLocaleString('tr-TR', {minimumFractionDigits: 2});
+            document.getElementById('kpiMaintenanceCost').innerText = '₺' + totalMaint.toLocaleString('tr-TR', {minimumFractionDigits: 2});
+            document.getElementById('kpiFixedCost').innerText = '₺' + totalFixed.toLocaleString('tr-TR', {minimumFractionDigits: 2});
+            document.getElementById('kpiNetProfit').innerText = '₺' + netProfit.toLocaleString('tr-TR', {minimumFractionDigits: 2});
+
+            // Vehicle Summary Table
+            renderVehicleSummary(revs, fuels, maints, fixeds);
+
+            // Logs
+            renderLogTables(revs, fuels, maints, fixeds);
+        }
+
+        function renderSelectOptions() {
+            const vehicleSelects = document.querySelectorAll('.vehicle-select');
+            vehicleSelects.forEach(select => {
+                const isOptional = select.id === 'fixedVehicle';
+                let html = isOptional ? '<option value="">-- Genel Dükkan / İşletme Gideri --</option>' : '';
+                db.vehicles.forEach(v => {
+                    html += `<option value="${v}">${v}</option>`;
+                });
+                select.innerHTML = html;
+            });
+
+            const driverSelects = document.querySelectorAll('.driver-select');
+            driverSelects.forEach(select => {
+                let html = '';
+                db.drivers.forEach(d => {
+                    html += `<option value="${d}">${d}</option>`;
+                });
+                select.innerHTML = html;
+            });
+        }
+
+        function renderSettingsLists() {
+            // Vehicle List
+            const vList = document.getElementById('vehicleList');
+            vList.innerHTML = db.vehicles.map(v => `
+                <li class="p-2.5 flex justify-between items-center text-sm">
+                    <span class="font-bold text-slate-700">${v}</span>
+                    <button onclick="removeVehicle('${v}')" class="text-rose-600 hover:text-rose-800 text-xs"><i class="fa-solid fa-trash"></i></button>
+                </li>
+            `).join('') || '<li class="p-3 text-xs text-slate-400">Tanımlı araç yok.</li>';
+
+            // Driver List
+            const dList = document.getElementById('driverList');
+            dList.innerHTML = db.drivers.map(d => `
+                <li class="p-2.5 flex justify-between items-center text-sm">
+                    <span class="text-slate-700">${d}</span>
+                    <button onclick="removeDriver('${d}')" class="text-rose-600 hover:text-rose-800 text-xs"><i class="fa-solid fa-trash"></i></button>
+                </li>
+            `).join('') || '<li class="p-3 text-xs text-slate-400">Tanımlı şoför yok.</li>';
+        }
+
+        function renderVehicleSummary(revs, fuels, maints, fixeds) {
+            const tbody = document.getElementById('vehicleSummaryTable');
+            if (db.vehicles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400 text-xs">Lütfen önce Araç & Şoför Tanımları sekmesinden araç plakası ekleyin.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = db.vehicles.map(placa => {
+                const vRev = revs.filter(r => r.vehicle === placa).reduce((s, i) => s + i.amount, 0);
+                const vFuel = fuels.filter(f => f.vehicle === placa).reduce((s, i) => s + i.amount, 0);
+                const vMaint = maints.filter(m => m.vehicle === placa).reduce((s, i) => s + i.amount, 0);
+                const vFixed = fixeds.filter(x => x.vehicle === placa).reduce((s, i) => s + i.amount, 0);
+                const vNet = vRev - (vFuel + vMaint + vFixed);
+
+                return `
+                    <tr class="hover:bg-slate-50 border-b">
+                        <td class="p-3 font-bold text-slate-900">${placa}</td>
+                        <td class="p-3 text-emerald-600 font-bold">₺${vRev.toLocaleString('tr-TR', {minimumFractionDigits: 2})}</td>
+                        <td class="p-3 text-amber-600">₺${vFuel.toLocaleString('tr-TR', {minimumFractionDigits: 2})}</td>
+                        <td class="p-3 text-rose-600">₺${vMaint.toLocaleString('tr-TR', {minimumFractionDigits: 2})}</td>
+                        <td class="p-3 text-purple-600">₺${vFixed.toLocaleString('tr-TR', {minimumFractionDigits: 2})}</td>
+                        <td class="p-3 font-bold ${vNet >= 0 ? 'text-blue-700' : 'text-rose-700'}">₺${vNet.toLocaleString('tr-TR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderLogTables(revs, fuels, maints, fixeds) {
+            // Ciro
+            document.getElementById('revCount').innerText = revs.length + ' Kayıt';
+            document.getElementById('revenueTable').innerHTML = revs.map(r => `
+                <tr>
+                    <td class="p-2">${r.date}</td>
+                    <td class="p-2 font-bold">${r.vehicle}</td>
+                    <td class="p-2">${r.driver}</td>
+                    <td class="p-2 text-right font-bold text-emerald-600">₺${r.amount.toLocaleString('tr-TR')}</td>
+                    <td class="p-2 text-center"><button onclick="deleteItem('revenues', ${r.id})" class="text-rose-600"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" class="p-3 text-center text-slate-400">Kayıt yok</td></tr>';
+
+            // Yakıt
+            document.getElementById('fuelCount').innerText = fuels.length + ' Kayıt';
+            document.getElementById('fuelTable').innerHTML = fuels.map(f => `
+                <tr>
+                    <td class="p-2">${f.date}</td>
+                    <td class="p-2 font-bold">${f.vehicle}</td>
+                    <td class="p-2 text-right font-bold text-amber-600">₺${f.amount.toLocaleString('tr-TR')}</td>
+                    <td class="p-2 text-center"><button onclick="deleteItem('fuels', ${f.id})" class="text-rose-600"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="4" class="p-3 text-center text-slate-400">Kayıt yok</td></tr>';
+
+            // Sanayi
+            document.getElementById('maintCount').innerText = maints.length + ' Kayıt';
+            document.getElementById('maintTable').innerHTML = maints.map(m => `
+                <tr>
+                    <td class="p-2">${m.date}</td>
+                    <td class="p-2 font-bold">${m.vehicle}</td>
+                    <td class="p-2">${m.description}</td>
+                    <td class="p-2 text-right font-bold text-rose-600">₺${m.amount.toLocaleString('tr-TR')}</td>
+                    <td class="p-2 text-center"><button onclick="deleteItem('maintenances', ${m.id})" class="text-rose-600"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" class="p-3 text-center text-slate-400">Kayıt yok</td></tr>';
+
+            // Sabit Gider
+            document.getElementById('fixedCount').innerText = fixeds.length + ' Kayıt';
+            document.getElementById('fixedTable').innerHTML = fixeds.map(x => `
+                <tr>
+                    <td class="p-2">${x.date}</td>
+                    <td class="p-2">${x.description} ${x.vehicle ? `<span class="font-bold">(${x.vehicle})</span>` : ''}</td>
+                    <td class="p-2 text-right font-bold text-purple-600">₺${x.amount.toLocaleString('tr-TR')}</td>
+                    <td class="p-2 text-center"><button onclick="deleteItem('fixedExpenses', ${x.id})" class="text-rose-600"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="4" class="p-3 text-center text-slate-400">Kayıt yok</td></tr>';
+        }
+    </script>
+</body>
+</html>
