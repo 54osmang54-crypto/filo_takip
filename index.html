@@ -48,9 +48,9 @@
                     <i class="fas fa-shuttle-van text-warning"></i> Filo Takip
                 </h4>
                 <div class="nav flex-column nav-pills mt-4" role="tablist">
-                    <button class="nav-link active text-start" data-bs-toggle="pill" data-bs-target="#tab-summary"><i class="fas fa-chart-line me-2"></i> Genel Özet & İstatistik</button>
-                    <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-daily"><i class="fas fa-file-invoice-dollar me-2"></i> Günlük Ciro & Gider</button>
-                    <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-vehicles"><i class="fas fa-bus-alt me-2"></i> Araç & Şoför Tanımları</button>
+                    <button class="nav-link active text-start" data-bs-toggle="pill" data-bs-target="#tab-summary"><i class="fas fa-chart-line me-2"></i> Genel Özet (Konsolide)</button>
+                    <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-daily"><i class="fas fa-file-invoice-dollar me-2"></i> Günlük Ciro & Gider Girişi</button>
+                    <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-fleet"><i class="fas fa-bus-alt me-2"></i> Araç ve Şoför Tanımları</button>
                     <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-month-end"><i class="fas fa-sliders-h me-2"></i> Ay Sonu & Ayarlar</button>
                 </div>
             </div>
@@ -61,94 +61,132 @@
         <div class="col-md-10 p-4">
             <div class="tab-content">
                 
-                <!-- TAB 1: Genel Özet ve Araç Detay İstatistikleri -->
+                <!-- TAB 1: Genel Özet (Tek Çatı Altında Konsolide) -->
                 <div class="tab-pane fade show active" id="tab-summary">
-                    <h3 class="mb-4 text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i>Bu Ayın Genel İstatistikleri</h3>
+                    <h3 class="mb-4 text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i>Mevcut Ay Genel Gelir ve Gider Dengesi</h3>
                     
-                    <!-- Genel Toplam Kartları -->
+                    <!-- Tek Çatı Toplam Kartları -->
                     <div class="row g-3 mb-4">
-                        <div class="col-md-3">
-                            <div class="card card-stat bg-primary text-white shadow-sm p-3">
-                                <h6>Filo Toplam Ciro</h6>
-                                <h3 id="statTotalRevenue">0 TL</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card card-stat bg-danger text-white shadow-sm p-3">
-                                <h6>Toplam Akaryakıt Gideri</h6>
-                                <h3 id="statTotalFuel">0 TL</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card card-stat bg-warning text-dark shadow-sm p-3">
-                                <h6>Diğer Giderler</h6>
-                                <h3 id="statTotalExpense">0 TL</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="card card-stat bg-success text-white shadow-sm p-3">
-                                <h6>Filo Net Kar</h6>
-                                <h3 id="statNetProfit">0 TL</h3>
+                                <h6>Toplam Ciro / Gelir</h6>
+                                <h2 id="statTotalRevenue">0 TL</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card card-stat bg-danger text-white shadow-sm p-3">
+                                <h6>Toplam Tüm Giderler</h6>
+                                <h2 id="statTotalExpenseAll">0 TL</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card card-stat bg-primary text-white shadow-sm p-3">
+                                <h6>Net Kalan Bakiye (Kar)</h6>
+                                <h2 id="statNetProfit">0 TL</h2>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Araç Bazlı Ayrıntılı İstatistik Sütunları -->
-                    <h4 class="mt-4 mb-3"><i class="fas fa-truck-monster me-2 text-secondary"></i>Araç Bazlı Performans ve Yakıt Verileri</h4>
+                    <!-- Gider Detayları Kırılımı (Kategori Bazlı) -->
+                    <h4 class="mt-4 mb-3"><i class="fas fa-list-alt me-2 text-secondary"></i>Gider Kalemleri Dağılımı (Tek Çatı)</h4>
+                    <div class="row g-3 mb-4">
+                        <div class="col">
+                            <div class="card p-3 shadow-sm border-0 border-start border-4 border-danger">
+                                <small class="text-muted">Akaryakıt Gideri</small>
+                                <h4 id="statFuel" class="m-0 text-danger">0 TL</h4>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card p-3 shadow-sm border-0 border-start border-4 border-warning">
+                                <small class="text-muted">Sanayi / Usta / Parça</small>
+                                <h4 id="statRepair" class="m-0 text-warning">0 TL</h4>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card p-3 shadow-sm border-0 border-start border-4 border-info">
+                                <small class="text-muted">Kira Ödemeleri</small>
+                                <h4 id="statRent" class="m-0 text-info">0 TL</h4>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card p-3 shadow-sm border-0 border-start border-4 border-secondary">
+                                <small class="text-muted">Muhasebe & Vergi</small>
+                                <h4 id="statTax" class="m-0 text-secondary">0 TL</h4>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card p-3 shadow-sm border-0 border-start border-4 border-dark">
+                                <small class="text-muted">Diğer Giderler</small>
+                                <h4 id="statOther" class="m-0 text-dark">0 TL</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Araç Bazlı Performans Özetleri -->
+                    <h4 class="mt-4 mb-3"><i class="fas fa-bus me-2 text-secondary"></i>Araç Bazlı Ciro ve Performans Özeti</h4>
                     <div class="row" id="vehicleStatsContainer"></div>
                 </div>
 
                 <!-- TAB 2: Günlük Ciro ve Gider Girişi -->
                 <div class="tab-pane fade" id="tab-daily">
-                    <h3 class="mb-4"><i class="fas fa-plus-circle me-2 text-success"></i>Günlük Veri Girişi</h3>
+                    <h3 class="mb-4"><i class="fas fa-plus-circle me-2 text-success"></i>Veri Girişi (Ciro veya Gider)</h3>
                     <div class="row">
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <div class="card shadow-sm p-3 mb-4">
-                                <h5>Yeni Kayıt Ekle</h5>
+                                <h5>Yeni İşlem Kaydı</h5>
                                 <form id="dailyForm" onsubmit="saveDailyRecord(event)">
                                     <div class="mb-3">
                                         <label class="form-label">Tarih</label>
                                         <input type="date" id="entryDate" class="form-control" required>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Araç Plakası</label>
-                                        <select id="entryVehicle" class="form-select" onchange="updateDriverOptions()" required></select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Vardiya / Şoför</label>
-                                        <select id="entryShift" class="form-select" required>
-                                            <option value="">Önce Araç Seçin</option>
+                                        <label class="form-label">İlişkili Araç (İsteğe Bağlı)</label>
+                                        <select id="entryVehicle" class="form-select">
+                                            <option value="Genel / Araçsız">Genel / Belirli Bir Araç Yok</option>
                                         </select>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Ciro (TL)</label>
-                                        <input type="number" id="entryRevenue" class="form-control" placeholder="0" step="0.01" required>
+                                        <label class="form-label">Şoför (İsteğe Bağlı)</label>
+                                        <select id="entryDriver" class="form-select">
+                                            <option value="Belirtilmedi">Şoför Seçilmedi / Yok</option>
+                                        </select>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Akaryakıt Harcaması (TL)</label>
-                                        <input type="number" id="entryFuel" class="form-control" placeholder="0" step="0.01" value="0">
+                                        <label class="form-label">İşlem Türü</label>
+                                        <select id="entryCategory" class="form-select" onchange="toggleCategoryInput()" required>
+                                            <option value="Ciro"> Günlük Ciro (Gelir)</option>
+                                            <option value="Akaryakıt"> Akaryakıt (Depo Dolumu)</option>
+                                            <option value="Sanayi"> Sanayi / Usta / Parça</option>
+                                            <option value="Kira"> Kira Ödemesi</option>
+                                            <option value="Muhasebe-Vergi"> Muhasebe & Vergi</option>
+                                            <option value="Diğer"> Diğer Gider</option>
+                                        </select>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Diğer Giderler (Bakım, Yıkama vb.) (TL)</label>
-                                        <input type="number" id="entryExpense" class="form-control" placeholder="0" step="0.01" value="0">
+                                        <label class="form-label">Tutar (TL)</label>
+                                        <input type="number" id="entryAmount" class="form-control" placeholder="0" step="0.01" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Açıklama / Not</label>
+                                        <input type="text" id="entryNote" class="form-control" placeholder="Örn: Yağ değişimi yapıldı, Dükkan kirası vb.">
                                     </div>
                                     <button type="submit" class="btn btn-success w-100"><i class="fas fa-save me-2"></i>Kaydet</button>
                                 </form>
                             </div>
                         </div>
-                        <div class="col-md-7">
+                        <div class="col-md-8">
                             <div class="card shadow-sm p-3">
-                                <h5>Bu Ayın Günlük Hareketleri</h5>
+                                <h5>Bu Ayın Hareket Dökümü</h5>
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle">
                                         <thead class="table-dark">
                                             <tr>
                                                 <th>Tarih</th>
-                                                <th>Plaka</th>
-                                                <th>Vardiya / Şoför</th>
-                                                <th>Ciro</th>
-                                                <th>Yakıt</th>
-                                                <th>Diğer</th>
+                                                <th>Araç</th>
+                                                <th>Şoför</th>
+                                                <th>Tür</th>
+                                                <th>Açıklama</th>
+                                                <th>Tutar</th>
                                                 <th>İşlem</th>
                                             </tr>
                                         </thead>
@@ -160,46 +198,39 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: Araç ve Şoför Tanımları -->
-                <div class="tab-pane fade" id="tab-vehicles">
-                    <h3 class="mb-4"><i class="fas fa-cogs me-2 text-primary"></i>Araç ve Çift Şoför Tanımları</h3>
+                <!-- TAB 3: Araç ve Bağımsız Şoför Tanımları -->
+                <div class="tab-pane fade" id="tab-fleet">
+                    <h3 class="mb-4"><i class="fas fa-users-cog me-2 text-primary"></i>Araç ve Bağımsız Şoför Yönetimi</h3>
                     <div class="row">
-                        <div class="col-md-4">
-                            <div class="card shadow-sm p-3 mb-4">
-                                <h5>Yeni Araç & Şoförler Ekle</h5>
-                                <form id="vehicleForm" onsubmit="saveVehicle(event)">
-                                    <div class="mb-3">
-                                        <label class="form-label">Araç Plakası</label>
-                                        <input type="text" id="vehPlate" class="form-control" placeholder="Örn: 54 M 0116" required>
+                        <!-- Araç Ekleme -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card shadow-sm p-3">
+                                <h5><i class="fas fa-bus me-2 text-primary"></i>Araç Ekle / Çıkar</h5>
+                                <form id="vehicleForm" onsubmit="saveVehicle(event)" class="row g-2 mb-3">
+                                    <div class="col-8">
+                                        <input type="text" id="vehPlate" class="form-control" placeholder="Plaka (Örn: 54 M 0116)" required>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">1. Şoför (Gündüz Vardiyası)</label>
-                                        <input type="text" id="vehDriver1" class="form-control" placeholder="Ad Soyad" required>
+                                    <div class="col-4">
+                                        <button type="submit" class="btn btn-primary w-100"><i class="fas fa-plus"></i> Ekle</button>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">2. Şoför (Gece Vardiyası)</label>
-                                        <input type="text" id="vehDriver2" class="form-control" placeholder="Ad Soyad" required>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-plus me-2"></i>Sisteme Ekle</button>
                                 </form>
+                                <ul class="list-group" id="vehicleListContainer"></ul>
                             </div>
                         </div>
-                        <div class="col-md-8">
+
+                        <!-- Şoför Ekleme -->
+                        <div class="col-md-6 mb-4">
                             <div class="card shadow-sm p-3">
-                                <h5>Kayıtlı Araç Filosu</h5>
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Plaka</th>
-                                                <th>1. Şoför (Gündüz)</th>
-                                                <th>2. Şoför (Gece)</th>
-                                                <th>İşlem</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="vehicleTableBody"></tbody>
-                                    </table>
-                                </div>
+                                <h5><i class="fas fa-user-tie me-2 text-success"></i>Şoför Havuzu (Serbest / Ek Şoförler)</h5>
+                                <form id="driverForm" onsubmit="saveDriver(event)" class="row g-2 mb-3">
+                                    <div class="col-8">
+                                        <input type="text" id="driverName" class="form-control" placeholder="Şoför Adı Soyadı" required>
+                                    </div>
+                                    <div class="col-4">
+                                        <button type="submit" class="btn btn-success w-100"><i class="fas fa-plus"></i> Ekle</button>
+                                    </div>
+                                </form>
+                                <ul class="list-group" id="driverListContainer"></ul>
                             </div>
                         </div>
                     </div>
@@ -207,14 +238,14 @@
 
                 <!-- TAB 4: Ay Sonu & Sistem Ayarları -->
                 <div class="tab-pane fade" id="tab-month-end">
-                    <h3 class="mb-4"><i class="fas fa-history me-2 text-warning"></i>Ay Sonu İşlemleri ve Sistem Ayarları</h3>
+                    <h3 class="mb-4"><i class="fas fa-history me-2 text-warning"></i>Ay Sonu İşlemleri ve Şifre Ayarları</h3>
                     
                     <div class="row mb-4">
                         <!-- Şifre Değiştirme Kutusu -->
                         <div class="col-md-6">
                             <div class="card shadow-sm p-4 border-primary">
-                                <h4><i class="fas fa-key text-primary me-2"></i>Giriş Şifresini Değiştir</h4>
-                                <p class="text-muted small">Sisteme giriş yaparken kullandığınız şifreyi buradan özelleştirebilirsiniz.</p>
+                                <h4><i class="fas fa-key text-primary me-2"></i>Giriş Şifresini Özelleştir</h4>
+                                <p class="text-muted small">Sisteme giriş yaparken kullandığınız şifreyi istediğiniz zaman buradan değiştirebilirsiniz.</p>
                                 <form onsubmit="changePassword(event)">
                                     <div class="mb-3">
                                         <label class="form-label">Yeni Şifreniz</label>
@@ -229,7 +260,7 @@
                         <div class="col-md-6">
                             <div class="card shadow-sm p-4 border-warning">
                                 <h4><i class="fas fa-calendar-check text-warning me-2"></i>Ay Sonu Hesap Kapatma</h4>
-                                <p class="text-muted small">Mevcut ayın tüm verilerini arşive kaydeder ve yeni aya temiz bir sayfa açar.</p>
+                                <p class="text-muted small">Mevcut ayın tüm ciro ve giderlerini arşive aktarır ve yeni ay için temiz sayfa açar.</p>
                                 <button onclick="closeCurrentMonth()" class="btn btn-warning btn-lg w-100"><i class="fas fa-lock me-2"></i>Ayı Kapat ve Arşivle</button>
                             </div>
                         </div>
@@ -253,9 +284,10 @@
 
 <script>
     // LocalStorage Veri Yapıları
-    let vehicles = JSON.parse(localStorage.getItem('filo_vehicles')) || [];
-    let dailyRecords = JSON.parse(localStorage.getItem('filo_daily')) || [];
-    let archives = JSON.parse(localStorage.getItem('filo_archives')) || [];
+    let vehicles = JSON.parse(localStorage.getItem('filo_v2_vehicles')) || [];
+    let drivers = JSON.parse(localStorage.getItem('filo_v2_drivers')) || [];
+    let dailyRecords = JSON.parse(localStorage.getItem('filo_v2_daily')) || [];
+    let archives = JSON.parse(localStorage.getItem('filo_v2_archives')) || [];
     let systemPass = localStorage.getItem('filo_password') || '1234';
 
     // Şifre Kontrolü
@@ -271,7 +303,7 @@
         }
     }
 
-    // Şifre Değiştirme Fonksiyonu
+    // Şifre Değiştirme
     function changePassword(e) {
         e.preventDefault();
         const newPass = document.getElementById('newPassInput').value.trim();
@@ -291,95 +323,109 @@
 
     function initApp() {
         document.getElementById('entryDate').valueAsDate = new Date();
-        renderVehicles();
+        renderVehiclesAndDrivers();
         renderDailyTable();
         renderSummaryStats();
         renderArchives();
     }
 
-    // Araç Ekleme
+    // Araç ve Şoför Yönetimi
     function saveVehicle(e) {
         e.preventDefault();
         const plate = document.getElementById('vehPlate').value.trim();
-        const driver1 = document.getElementById('vehDriver1').value.trim();
-        const driver2 = document.getElementById('vehDriver2').value.trim();
-
-        vehicles.push({ id: Date.now(), plate, driver1, driver2 });
-        localStorage.setItem('filo_vehicles', JSON.stringify(vehicles));
-        
-        document.getElementById('vehicleForm').reset();
-        renderVehicles();
-        alert('Araç ve şoförler eklendi!');
+        if(plate) {
+            vehicles.push({ id: Date.now(), plate });
+            localStorage.setItem('filo_v2_vehicles', JSON.stringify(vehicles));
+            document.getElementById('vehicleForm').reset();
+            renderVehiclesAndDrivers();
+        }
     }
 
     function deleteVehicle(id) {
         if(confirm('Bu aracı silmek istediğinize emin misiniz?')) {
             vehicles = vehicles.filter(v => v.id !== id);
-            localStorage.setItem('filo_vehicles', JSON.stringify(vehicles));
-            renderVehicles();
+            localStorage.setItem('filo_v2_vehicles', JSON.stringify(vehicles));
+            renderVehiclesAndDrivers();
         }
     }
 
-    function renderVehicles() {
-        const tbody = document.getElementById('vehicleTableBody');
-        const select = document.getElementById('entryVehicle');
-        tbody.innerHTML = '';
-        select.innerHTML = '<option value="">Araç Seçin...</option>';
+    function saveDriver(e) {
+        e.preventDefault();
+        const name = document.getElementById('driverName').value.trim();
+        if(name) {
+            drivers.push({ id: Date.now(), name });
+            localStorage.setItem('filo_v2_drivers', JSON.stringify(drivers));
+            document.getElementById('driverForm').reset();
+            renderVehiclesAndDrivers();
+        }
+    }
+
+    function deleteDriver(id) {
+        if(confirm('Bu şoförü silmek istediğinize emin misiniz?')) {
+            drivers = drivers.filter(d => d.id !== id);
+            localStorage.setItem('filo_v2_drivers', JSON.stringify(drivers));
+            renderVehiclesAndDrivers();
+        }
+    }
+
+    function renderVehiclesAndDrivers() {
+        // Araçlar Listesi ve Dropdown
+        const vehContainer = document.getElementById('vehicleListContainer');
+        const vehSelect = document.getElementById('entryVehicle');
+        vehContainer.innerHTML = '';
+        vehSelect.innerHTML = '<option value="Genel / Araçsız">Genel / Belirli Bir Araç Yok</option>';
 
         vehicles.forEach(v => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>${v.plate}</strong></td>
-                    <td><span class="badge bg-info text-dark"><i class="fas fa-sun me-1"></i>${v.driver1}</span></td>
-                    <td><span class="badge bg-dark"><i class="fas fa-moon me-1"></i>${v.driver2}</span></td>
-                    <td><button onclick="deleteVehicle(${v.id})" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></td>
-                </tr>
+            vehContainer.innerHTML += `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <strong>${v.plate}</strong>
+                    <button onclick="deleteVehicle(${v.id})" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                </li>
             `;
-            select.innerHTML += `<option value="${v.plate}">${v.plate}</option>`;
+            vehSelect.innerHTML += `<option value="${v.plate}">${v.plate}</option>`;
+        });
+
+        // Şoförler Listesi ve Dropdown
+        const drvContainer = document.getElementById('driverListContainer');
+        const drvSelect = document.getElementById('entryDriver');
+        drvContainer.innerHTML = '';
+        drvSelect.innerHTML = '<option value="Belirtilmedi">Şoför Seçilmedi / Yok</option>';
+
+        drivers.forEach(d => {
+            drvContainer.innerHTML += `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>${d.name}</span>
+                    <button onclick="deleteDriver(${d.id})" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                </li>
+            `;
+            drvSelect.innerHTML += `<option value="${d.name}">${d.name}</option>`;
         });
     }
 
-    // Vardiya Seçenekleri Güncelleme
-    function updateDriverOptions() {
-        const plate = document.getElementById('entryVehicle').value;
-        const shiftSelect = document.getElementById('entryShift');
-        shiftSelect.innerHTML = '';
-
-        const veh = vehicles.find(v => v.plate === plate);
-        if(veh) {
-            shiftSelect.innerHTML = `
-                <option value="Gündüz (${veh.driver1})">Gündüz Vardiyası - ${veh.driver1}</option>
-                <option value="Gece (${veh.driver2})">Gece Vardiyası - ${veh.driver2}</option>
-            `;
-        } else {
-            shiftSelect.innerHTML = '<option value="">Önce Araç Seçin</option>';
-        }
-    }
-
-    // Günlük Hareket Kaydetme
+    // Günlük Kayıt Ekleme
     function saveDailyRecord(e) {
         e.preventDefault();
         const date = document.getElementById('entryDate').value;
         const plate = document.getElementById('entryVehicle').value;
-        const shift = document.getElementById('entryShift').value;
-        const revenue = parseFloat(document.getElementById('entryRevenue').value) || 0;
-        const fuel = parseFloat(document.getElementById('entryFuel').value) || 0;
-        const expense = parseFloat(document.getElementById('entryExpense').value) || 0;
+        const driver = document.getElementById('entryDriver').value;
+        const category = document.getElementById('entryCategory').value;
+        const amount = parseFloat(document.getElementById('entryAmount').value) || 0;
+        const note = document.getElementById('entryNote').value.trim();
 
-        dailyRecords.push({ id: Date.now(), date, plate, shift, revenue, fuel, expense });
-        localStorage.setItem('filo_daily', JSON.stringify(dailyRecords));
+        dailyRecords.push({ id: Date.now(), date, plate, driver, category, amount, note });
+        localStorage.setItem('filo_v2_daily', JSON.stringify(dailyRecords));
 
         document.getElementById('dailyForm').reset();
         document.getElementById('entryDate').valueAsDate = new Date();
         renderDailyTable();
         renderSummaryStats();
-        alert('Ciro ve gider kaydı eklendi.');
+        alert('Kayıt eklendi.');
     }
 
     function deleteDailyRecord(id) {
         if(confirm('Bu kaydı silmek istediğinize emin misiniz?')) {
             dailyRecords = dailyRecords.filter(r => r.id !== id);
-            localStorage.setItem('filo_daily', JSON.stringify(dailyRecords));
+            localStorage.setItem('filo_v2_daily', JSON.stringify(dailyRecords));
             renderDailyTable();
             renderSummaryStats();
         }
@@ -390,82 +436,90 @@
         tbody.innerHTML = '';
 
         dailyRecords.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(r => {
+            const isRevenue = r.category === 'Ciro';
+            const badgeClass = isRevenue ? 'bg-success' : 'bg-danger';
+            
             tbody.innerHTML += `
                 <tr>
                     <td>${r.date}</td>
                     <td><strong>${r.plate}</strong></td>
-                    <td><small class="text-muted">${r.shift}</small></td>
-                    <td class="text-success fw-bold">+${r.revenue.toLocaleString()} TL</td>
-                    <td class="text-danger">-${r.fuel.toLocaleString()} TL</td>
-                    <td class="text-warning">-${r.expense.toLocaleString()} TL</td>
+                    <td><small class="text-muted">${r.driver}</small></td>
+                    <td><span class="badge ${badgeClass}">${r.category}</span></td>
+                    <td><small>${r.note || '-'}</small></td>
+                    <td class="${isRevenue ? 'text-success' : 'text-danger'} fw-bold">
+                        ${isRevenue ? '+' : '-'}${r.amount.toLocaleString()} TL
+                    </td>
                     <td><button onclick="deleteDailyRecord(${r.id})" class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></button></td>
                 </tr>
             `;
         });
     }
 
-    // İstatistik Hesaplama
+    // Genel Hesaplama ve Konsolide Tablo
     function renderSummaryStats() {
-        let totRev = 0, totFuel = 0, totExp = 0;
-        let vehStats = {};
+        let totalRev = 0;
+        let fuelTot = 0, repairTot = 0, rentTot = 0, taxTot = 0, otherTot = 0;
+        let vehSummary = {};
 
         vehicles.forEach(v => {
-            vehStats[v.plate] = { revenue: 0, fuel: 0, expense: 0 };
+            vehSummary[v.plate] = { revenue: 0, expense: 0 };
         });
 
         dailyRecords.forEach(r => {
-            totRev += r.revenue;
-            totFuel += r.fuel;
-            totExp += r.expense;
+            if(r.category === 'Ciro') {
+                totalRev += r.amount;
+                if(vehSummary[r.plate]) vehSummary[r.plate].revenue += r.amount;
+            } else {
+                if(r.category === 'Akaryakıt') fuelTot += r.amount;
+                else if(r.category === 'Sanayi') repairTot += r.amount;
+                else if(r.category === 'Kira') rentTot += r.amount;
+                else if(r.category === 'Muhasebe-Vergi') taxTot += r.amount;
+                else otherTot += r.amount;
 
-            if(vehStats[r.plate]) {
-                vehStats[r.plate].revenue += r.revenue;
-                vehStats[r.plate].fuel += r.fuel;
-                vehStats[r.plate].expense += r.expense;
+                if(vehSummary[r.plate]) vehSummary[r.plate].expense += r.amount;
             }
         });
 
-        document.getElementById('statTotalRevenue').innerText = totRev.toLocaleString() + ' TL';
-        document.getElementById('statTotalFuel').innerText = totFuel.toLocaleString() + ' TL';
-        document.getElementById('statTotalExpense').innerText = totExp.toLocaleString() + ' TL';
-        document.getElementById('statNetProfit').innerText = (totRev - totFuel - totExp).toLocaleString() + ' TL';
+        let totalExpenseAll = fuelTot + repairTot + rentTot + taxTot + otherTot;
+        let netProfit = totalRev - totalExpenseAll;
 
+        document.getElementById('statTotalRevenue').innerText = totalRev.toLocaleString() + ' TL';
+        document.getElementById('statTotalExpenseAll').innerText = totalExpenseAll.toLocaleString() + ' TL';
+        document.getElementById('statNetProfit').innerText = netProfit.toLocaleString() + ' TL';
+
+        document.getElementById('statFuel').innerText = fuelTot.toLocaleString() + ' TL';
+        document.getElementById('statRepair').innerText = repairTot.toLocaleString() + ' TL';
+        document.getElementById('statRent').innerText = rentTot.toLocaleString() + ' TL';
+        document.getElementById('statTax').innerText = taxTot.toLocaleString() + ' TL';
+        document.getElementById('statOther').innerText = otherTot.toLocaleString() + ' TL';
+
+        // Araç Performans Kartları
         const statsContainer = document.getElementById('vehicleStatsContainer');
         statsContainer.innerHTML = '';
 
         if(vehicles.length === 0) {
-            statsContainer.innerHTML = '<div class="col-12"><p class="text-muted">Henüz kayıtlı araç bulunmuyor.</p></div>';
+            statsContainer.innerHTML = '<div class="col-12"><p class="text-muted">Kayıtlı araç bulunmuyor.</p></div>';
             return;
         }
 
         vehicles.forEach(v => {
-            const stat = vehStats[v.plate] || { revenue: 0, fuel: 0, expense: 0 };
-            const net = stat.revenue - stat.fuel - stat.expense;
-            const fuelRatio = stat.revenue > 0 ? ((stat.fuel / stat.revenue) * 100).toFixed(1) : 0;
+            const stat = vehSummary[v.plate] || { revenue: 0, expense: 0 };
+            const net = stat.revenue - stat.expense;
 
             statsContainer.innerHTML += `
                 <div class="col-md-4 mb-3">
                     <div class="card vehicle-card shadow-sm p-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h4 class="m-0 text-primary">${v.plate}</h4>
-                            <span class="badge bg-secondary">${fuelRatio}% Yakıt Oranı</span>
-                        </div>
-                        <p class="mb-1 text-muted"><i class="fas fa-sun me-1 text-warning"></i>${v.driver1} | <i class="fas fa-moon me-1 text-dark"></i>${v.driver2}</p>
-                        <hr class="my-2">
-                        <div class="d-flex justify-content-between">
-                            <span>Aylık Ciro:</span>
+                        <h4 class="m-0 text-primary mb-2">${v.plate}</h4>
+                        <div class="d-flex justify-content-between text-muted mb-1">
+                            <span>Toplanan Ciro:</span>
                             <strong class="text-success">+${stat.revenue.toLocaleString()} TL</strong>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <span>Akaryakıt Gideri:</span>
-                            <strong class="text-danger">-${stat.fuel.toLocaleString()} TL</strong>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span>Diğer Giderler:</span>
-                            <strong class="text-warning">-${stat.expense.toLocaleString()} TL</strong>
+                        <div class="d-flex justify-content-between text-muted mb-1">
+                            <span>Doğrudan Giderler:</span>
+                            <strong class="text-danger">-${stat.expense.toLocaleString()} TL</strong>
                         </div>
                         <div class="d-flex justify-content-between mt-2 pt-2 border-top">
-                            <strong>Net Kazanç:</strong>
+                            <strong>Araç Bakiyesi:</strong>
                             <strong class="text-primary fs-5">${net.toLocaleString()} TL</strong>
                         </div>
                     </div>
@@ -484,27 +538,24 @@
         const monthName = prompt('Kapatılan Ayın Adını Girin (Örn: "Eylül 2026"):');
         if(!monthName) return;
 
-        let totRev = 0, totFuel = 0, totExp = 0;
+        let totalRev = 0, totalExp = 0;
         dailyRecords.forEach(r => {
-            totRev += r.revenue;
-            totFuel += r.fuel;
-            totExp += r.expense;
+            if(r.category === 'Ciro') totalRev += r.amount;
+            else totalExp += r.amount;
         });
 
         archives.push({
             id: Date.now(),
             month: monthName,
-            totalRevenue: totRev,
-            totalFuel: totFuel,
-            totalExpense: totExp,
-            netProfit: totRev - totFuel - totExp,
-            recordsCount: dailyRecords.length,
+            totalRevenue: totalRev,
+            totalExpense: totalExp,
+            netProfit: totalRev - totalExp,
             closedAt: new Date().toLocaleDateString('tr-TR')
         });
 
-        localStorage.setItem('filo_archives', JSON.stringify(archives));
+        localStorage.setItem('filo_v2_archives', JSON.stringify(archives));
         dailyRecords = [];
-        localStorage.setItem('filo_daily', JSON.stringify(dailyRecords));
+        localStorage.setItem('filo_v2_daily', JSON.stringify(dailyRecords));
 
         renderDailyTable();
         renderSummaryStats();
@@ -529,10 +580,9 @@
                         <small class="text-muted">Kapanış Tarihi: ${a.closedAt}</small>
                     </div>
                     <div class="row mt-2">
-                        <div class="col-md-3">Ciro: <strong class="text-success">${a.totalRevenue.toLocaleString()} TL</strong></div>
-                        <div class="col-md-3">Yakıt: <strong class="text-danger">${a.totalFuel.toLocaleString()} TL</strong></div>
-                        <div class="col-md-3">Diğer Gider: <strong class="text-warning">${a.totalExpense.toLocaleString()} TL</strong></div>
-                        <div class="col-md-3">Net Kar: <strong class="text-primary">${a.netProfit.toLocaleString()} TL</strong></div>
+                        <div class="col-md-4">Ciro: <strong class="text-success">${a.totalRevenue.toLocaleString()} TL</strong></div>
+                        <div class="col-md-4">Gider: <strong class="text-danger">${a.totalExpense.toLocaleString()} TL</strong></div>
+                        <div class="col-md-4">Net Bakiye: <strong class="text-primary">${a.netProfit.toLocaleString()} TL</strong></div>
                     </div>
                 </div>
             `;
@@ -541,5 +591,3 @@
 </script>
 </body>
 </html>
-            
- 
