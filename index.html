@@ -57,9 +57,66 @@
         th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
         th { background: #f1f5f9; }
         .btn-del { background: #dc2626; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; }
+
+        /* GİRİŞ VE ŞİFRE DEĞİŞTİRME MODALI STİLLERİ */
+        #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #121212; display: flex; justify-content: center;
+            align-items: center; z-index: 99999; font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+        }
+        .auth-card {
+            background: #1e1e1e; padding: 30px; border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5); text-align: center; color: #ffffff; width: 300px;
+        }
+        .auth-card h3 { font-size: 18px; margin-bottom: 15px; color: #ffffff; }
+        .auth-card input {
+            width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 6px;
+            border: 1px solid #333; background: #2a2a2a; color: #fff; box-sizing: border-box; text-align: center; outline: none;
+        }
+        .auth-card input:focus { border-color: #0284c7; }
+        .auth-card button {
+            width: 100%; padding: 10px; border-radius: 6px; border: none;
+            background-color: #16a34a; color: white; font-weight: bold; cursor: pointer; transition: background 0.2s;
+        }
+        .auth-card button:hover { background-color: #15803d; }
+        #change-pass-btn {
+            position: fixed; top: 15px; right: 15px; z-index: 9999;
+            background: #1e293b; color: #fff; border: 1px solid #475569;
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;
+        }
+        #change-pass-btn:hover { background: #334155; }
+        #change-pass-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.8); display: none; justify-content: center;
+            align-items: center; z-index: 99998; font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+        }
     </style>
 </head>
 <body>
+
+    <!-- GİRİŞ EKRANI KORUMASI -->
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <h3>🔑 Erişim Şifresi</h3>
+            <input type="password" id="auth-input" placeholder="Şifrenizi girin" autofocus>
+            <button onclick="checkPassword()">Giriş Yap</button>
+            <div id="auth-error" style="color: #ef4444; display: none; margin-top: 10px; font-size: 13px;">Hatalı şifre!</div>
+        </div>
+    </div>
+
+    <!-- ŞİFRE DEĞİŞTİR BUTONU VE MODALI -->
+    <button id="change-pass-btn" onclick="openChangePassModal()">Şifre Değiştir</button>
+
+    <div id="change-pass-modal">
+        <div class="auth-card">
+            <h3>Şifre Değiştir</h3>
+            <input type="password" id="current-pass-input" placeholder="Mevcut Şifre">
+            <input type="password" id="new-pass-input" placeholder="Yeni Şifre">
+            <button onclick="saveNewPassword()">Kaydet</button>
+            <button style="background: #64748b; margin-top: 6px;" onclick="closeChangePassModal()">İptal</button>
+            <div id="change-error" style="color: #ef4444; display: none; margin-top: 10px; font-size: 13px;"></div>
+        </div>
+    </div>
 
     <!-- YÖNETİM ALANI: ARAÇ VE ŞOFÖR EKLEME/SİLME -->
     <div class="management-section">
@@ -162,7 +219,63 @@
     </div>
 
     <script>
-        // LOKAL HAFIZA YÖNETİMİ
+        // --- ŞİFRE GÜVENLİK SİSTEMİ MANTIĞI ---
+        if (!localStorage.getItem("site_password")) {
+            localStorage.setItem("site_password", "12345");
+        }
+
+        document.getElementById("auth-input").addEventListener("keyup", function(e) {
+            if (e.key === "Enter") checkPassword();
+        });
+
+        function checkPassword() {
+            const inputPass = document.getElementById("auth-input").value;
+            const currentPass = localStorage.getItem("site_password");
+            const errDiv = document.getElementById("auth-error");
+
+            if (inputPass === currentPass) {
+                document.getElementById("auth-overlay").style.display = "none";
+                errDiv.style.display = "none";
+            } else {
+                errDiv.style.display = "block";
+                document.getElementById("auth-input").value = "";
+            }
+        }
+
+        function openChangePassModal() {
+            document.getElementById("change-pass-modal").style.display = "flex";
+            document.getElementById("current-pass-input").value = "";
+            document.getElementById("new-pass-input").value = "";
+            document.getElementById("change-error").style.display = "none";
+        }
+
+        function closeChangePassModal() {
+            document.getElementById("change-pass-modal").style.display = "none";
+        }
+
+        function saveNewPassword() {
+            const currentInput = document.getElementById("current-pass-input").value;
+            const newInput = document.getElementById("new-pass-input").value;
+            const storedPass = localStorage.getItem("site_password");
+            const errDiv = document.getElementById("change-error");
+
+            if (currentInput !== storedPass) {
+                errDiv.innerText = "Mevcut şifre hatalı!";
+                errDiv.style.display = "block";
+                return;
+            }
+            if (!newInput || !newInput.trim()) {
+                errDiv.innerText = "Yeni şifre boş olamaz!";
+                errDiv.style.display = "block";
+                return;
+            }
+
+            localStorage.setItem("site_password", newInput.trim());
+            alert("Şifreniz başarıyla güncellendi!");
+            closeChangePassModal();
+        }
+
+        // --- LOKAL HAFIZA VE FİLO YÖNETİMİ MANTIĞI ---
         let plakalari = JSON.parse(localStorage.getItem('fleetPlakalar')) || ["54 M 0116", "54 M 0117", "54 M 0118", "54 M 0119"];
         let soforler = JSON.parse(localStorage.getItem('fleetSoforler')) || ["Açık Şoför / Sahip", "Ahmet", "Mehmet"];
         let fleetData = JSON.parse(localStorage.getItem('fleetDataStorage')) || [];
