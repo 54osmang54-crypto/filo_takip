@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Filo Takip & Dashboard</title>
+    <title>Minibüs Filo Yonetim Paneli</title>
     <style>
         :root {
             --bg-color: #f4f6f9;
@@ -40,15 +40,16 @@
         
         .controls { display: flex; gap: 15px; align-items: center; }
         
-        select, button {
-            padding: 8px 16px;
+        select, button, input {
+            padding: 8px 12px;
             border-radius: 6px;
-            border: none;
+            border: 1px solid #cbd5e1;
             font-weight: 600;
-            cursor: pointer;
         }
 
-        .btn-add { background-color: #10b981; color: white; }
+        button { cursor: pointer; }
+
+        .btn-add { background-color: #10b981; color: white; border: none; padding: 10px 18px; font-size: 14px; }
         .btn-add:hover { background-color: #059669; }
 
         .category-section {
@@ -109,7 +110,6 @@
             margin-top: 5px;
         }
 
-        /* Renk Kodları */
         .ciro .card-value { color: var(--accent-ciro); }
         .ciro-border { border-left: 5px solid var(--accent-ciro); }
         
@@ -132,7 +132,6 @@
             border-radius: 6px;
         }
 
-        /* Modal / Pencere */
         .modal {
             display: none;
             position: fixed;
@@ -148,9 +147,10 @@
             padding: 25px;
             border-radius: var(--border-radius);
             width: 90%;
-            max-width: 650px;
+            max-width: 600px;
             max-height: 85vh;
             overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
         .modal-header {
@@ -166,6 +166,7 @@
             font-size: 24px;
             cursor: pointer;
             color: #64748b;
+            font-weight: bold;
         }
 
         table {
@@ -184,7 +185,7 @@
         th { background: #f8fafc; }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
@@ -196,7 +197,7 @@
 
         .form-group input, .form-group select {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
             box-sizing: border-box;
@@ -206,10 +207,10 @@
 <body>
 
     <div class="header">
-        <h1>Minibüs Filo Yonetim Paneli</h1>
+        <h1>Minibüs Filo Yönetim Paneli</h1>
         <div class="controls">
             <input type="month" id="selectedMonth" onchange="renderDashboard()">
-            <button class="btn-add" onclick="openAddModal()">+ Yeni Veri Ekle</button>
+            <button class="btn-add" id="openAddBtn" type="button">+ Yeni Veri Ekle</button>
         </div>
     </div>
 
@@ -249,7 +250,7 @@
         <div class="category-total" id="sabit-total">Toplam Resmi Giderler: 0 TL</div>
     </div>
 
-    <!-- DETAY / DETAY MODAL -->
+    <!-- DETAY PENCERESİ -->
     <div class="modal" id="detailModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -260,7 +261,7 @@
         </div>
     </div>
 
-    <!-- VERİ EKLEME MODAL -->
+    <!-- VERİ EKLEME PENCERESİ -->
     <div class="modal" id="addModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -292,17 +293,18 @@
                 </div>
                 <div class="form-group">
                     <label>Tutar (TL)</label>
-                    <input type="number" id="formAmount" step="0.01" required>
+                    <input type="number" id="formAmount" step="0.01" required placeholder="0.00">
                 </div>
 
-                <!-- Dinamik Alanlar -->
+                <!-- Ciro Özel Alanları -->
                 <div id="ciroFields">
                     <div class="form-group">
                         <label>Şoför Adı / Vardiya</label>
-                        <input type="text" id="formSofor" placeholder="Örn: Ahmet Usta (1. Vardiya)">
+                        <input type="text" id="formSofor" placeholder="Örn: Gökhan (1. Şoför)">
                     </div>
                 </div>
 
+                <!-- Sanayi Özel Alanları -->
                 <div id="sanayiFields" style="display: none;">
                     <div class="form-group">
                         <label>Yapılan İşlem / Değişen Parça</label>
@@ -310,10 +312,11 @@
                     </div>
                     <div class="form-group">
                         <label>Usta / Servis Adı</label>
-                        <input type="text" id="formUsta" placeholder="Örn: Öz Otomotiv Sanayi">
+                        <input type="text" id="formUsta" placeholder="Örn: Öz Usta Sanayi">
                     </div>
                 </div>
 
+                <!-- Sabit Gider Özel Alanları -->
                 <div id="sabitFields" style="display: none;">
                     <div class="form-group">
                         <label>Gider Türü</label>
@@ -327,7 +330,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-add" style="width: 100%; margin-top: 15px; padding: 10px;">Kaydet</button>
+                <button type="submit" class="btn-add" style="width: 100%; margin-top: 15px;">Kaydet</button>
             </form>
         </div>
     </div>
@@ -336,9 +339,16 @@
         const vehicles = ["54 M 0116", "54 M 0117", "54 M 0118", "54 M 0119"];
         let db = JSON.parse(localStorage.getItem('fleetDB')) || [];
 
-        // Varsayılan Ay Ayarla
-        document.getElementById('selectedMonth').value = new Date().toISOString().slice(0, 7);
-        document.getElementById('formDate').value = new Date().toISOString().slice(0, 10);
+        // Sayfa yüklenince tarihleri ayarla
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('selectedMonth').value = new Date().toISOString().slice(0, 7);
+            document.getElementById('formDate').value = new Date().toISOString().slice(0, 10);
+            
+            // Butona tıklama olayını bağla
+            document.getElementById('openAddBtn').addEventListener('click', openAddModal);
+            
+            renderDashboard();
+        });
 
         function saveData(e) {
             e.preventDefault();
@@ -347,7 +357,7 @@
                 category: document.getElementById('formCategory').value,
                 plaka: document.getElementById('formPlaka').value,
                 date: document.getElementById('formDate').value,
-                amount: parseFloat(document.getElementById('formAmount').value),
+                amount: parseFloat(document.getElementById('formAmount').value) || 0,
                 sofor: document.getElementById('formSofor').value,
                 islem: document.getElementById('formIslem').value,
                 usta: document.getElementById('formUsta').value,
@@ -359,6 +369,7 @@
             closeModal('addModal');
             renderDashboard();
             document.getElementById('dataForm').reset();
+            document.getElementById('formDate').value = new Date().toISOString().slice(0, 10);
         }
 
         function renderDashboard() {
@@ -374,7 +385,7 @@
                     const filtered = db.filter(item => 
                         item.category === cat && 
                         item.plaka === plaka && 
-                        item.date.startsWith(month)
+                        item.date && item.date.startsWith(month)
                     );
 
                     const monthTotal = filtered.reduce((sum, i) => sum + i.amount, 0);
@@ -411,13 +422,13 @@
             const records = db.filter(item => 
                 item.category === category && 
                 item.plaka === plaka && 
-                item.date.startsWith(month)
+                item.date && item.date.startsWith(month)
             );
 
             modalTitle.innerText = `${plaka} - ${category.toUpperCase()} Detayları (${month})`;
 
             if (records.length === 0) {
-                modalBody.innerHTML = '<p>Bu ay için henüz kayıt bulunmamaktadır.</p>';
+                modalBody.innerHTML = '<p style="padding:10px;">Bu ay için henüz kayıt bulunmamaktadır.</p>';
             } else {
                 let tableHTML = `<table><thead><tr><th>Tarih</th>`;
                 
@@ -434,7 +445,7 @@
                         ${category === 'sanayi' ? `<td>${r.islem \vert{}\vert{} '-'}</td><td>${r.usta || '-'}</td>` : ''}
                         ${category === 'sabit' ? `<td>${r.giderTuru || '-'}</td>` : ''}
                         <td><b>${r.amount.toLocaleString('tr-TR')} TL</b></td>
-                        <td><button onclick="deleteRecord(${r.id})" style="background:#ef4444; color:white; padding:4px 8px; font-size:11px;">Sil</button></td>
+                        <td><button onclick="deleteRecord(${r.id})" style="background:#ef4444; color:white; border:none; padding:4px 8px; font-size:11px; border-radius:4px;">Sil</button></td>
                     </tr>`;
                 });
 
@@ -461,11 +472,13 @@
             document.getElementById('sabitFields').style.display = cat === 'sabit' ? 'block' : 'none';
         }
 
-        function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function openAddModal() {
+            document.getElementById('addModal').style.display = 'flex';
+        }
 
-        // İlk Yükleme
-        renderDashboard();
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
     </script>
 </body>
 </html>
