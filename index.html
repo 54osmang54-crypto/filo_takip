@@ -1,723 +1,471 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gelişmiş Filo Operasyon & Bütçe Yönetimi</title>
-  <style>
-    :root {
-      --primary: #0f172a;
-      --accent: #2563eb;
-      --success: #16a34a;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --border: #cbd5e1;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filo Takip & Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --primary: #1e293b;
+            --accent-ciro: #16a34a;
+            --accent-yakit: #d97706;
+            --accent-sanayi: #dc2626;
+            --accent-sabit: #2563eb;
+            --border-radius: 10px;
+        }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 20px; }
-    
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      background: var(--primary); color: white; padding: 15px 25px; border-radius: 12px; margin-bottom: 20px;
-    }
-    header h1 { font-size: 1.3rem; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #334155;
+        }
 
-    /* Navigasyon Sekmeleri */
-    .nav-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-    .tab-btn {
-      padding: 10px 18px; background: #e2e8f0; border: none; border-radius: 8px;
-      cursor: pointer; font-weight: 600; color: #475569; transition: all 0.2s;
-    }
-    .tab-btn.active { background: var(--accent); color: white; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary);
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+        .header h1 { margin: 0; font-size: 20px; }
+        
+        .controls { display: flex; gap: 15px; align-items: center; }
+        
+        select, button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
 
-    /* Kart Yapıları */
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px; }
-    .card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-    .card h3 { font-size: 1.1rem; margin-bottom: 15px; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+        .btn-add { background-color: #10b981; color: white; }
+        .btn-add:hover { background-color: #059669; }
 
-    /* Form ve Inputlar */
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #475569; }
-    .form-control { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; }
-    .form-row { display: flex; gap: 10px; }
+        .category-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
 
-    .btn { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-    .btn-primary { background: var(--accent); color: white; }
-    .btn-success { background: var(--success); color: white; }
-    .btn-warning { background: var(--warning); color: white; }
-    .btn-danger { background: var(--danger); color: white; }
+        .category-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+        }
 
-    /* Tablo Tasarımları */
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.88rem; }
-    th, td { padding: 9px; text-align: left; border-bottom: 1px solid var(--border); }
-    th { background: #f1f5f9; color: #334155; font-weight: 600; }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
 
-    .badge-list { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    .badge-item { background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); }
-    .badge-item button { background: none; border: none; color: var(--danger); cursor: pointer; font-weight: bold; }
+        .card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
 
-    .stat-box { padding: 12px; border-radius: 8px; background: #f8fafc; text-align: center; border: 1px solid var(--border); }
-    .stat-box .val { font-size: 1.3rem; font-weight: bold; margin-top: 4px; }
-    .stat-ciro { color: var(--success); }
-    .stat-yakit { color: var(--warning); }
-    .stat-bakim { color: var(--danger); }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
 
-    .month-filter-bar { background: #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; }
-  </style>
+        .card-plaka {
+            font-weight: 800;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .card-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .card-subtext {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        /* Renk Kodları */
+        .ciro .card-value { color: var(--accent-ciro); }
+        .ciro-border { border-left: 5px solid var(--accent-ciro); }
+        
+        .yakit .card-value { color: var(--accent-yakit); }
+        .yakit-border { border-left: 5px solid var(--accent-yakit); }
+        
+        .sanayi .card-value { color: var(--accent-sanayi); }
+        .sanayi-border { border-left: 5px solid var(--accent-sanayi); }
+        
+        .sabit .card-value { color: var(--accent-sabit); }
+        .sabit-border { border-left: 5px solid var(--accent-sabit); }
+
+        .category-total {
+            margin-top: 15px;
+            text-align: right;
+            font-size: 16px;
+            font-weight: 800;
+            background: #f1f5f9;
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+
+        /* Modal / Pencere */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        th { background: #f8fafc; }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
 
-  <header>
-    <h1>Hacıoğlu Durağı Filo & Bütçe Yönetim Paneli</h1>
-    <span id="currentDate"></span>
-  </header>
-
-  <!-- Navigasyon Sekmeleri -->
-  <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('gunluk-operasyon')">🚖 Günlük Ciro & Yakıt</button>
-    <button class="tab-btn" onclick="switchTab('arac-bakim')">🔧 Sanayi & Bakım Gideri</button>
-    <button class="tab-btn" onclick="switchTab('sofor-performans')">👨‍✈️ Şoför Performansı</button>
-    <button class="tab-btn" onclick="switchTab('kisisel-butce')">🏠 Kişisel & Aile Bütçesi</button>
-    <button class="tab-btn" onclick="switchTab('tanimlamalar')" style="background: #cbd5e1;">⚙️ Araç & Şoför Yönetimi</button>
-  </div>
-
-  <!-- AYLIK FİLTRELEME ÇUBUĞU (Aylık Saklama & Geçmiş İnceleme) -->
-  <div class="month-filter-bar">
-    <strong>📅 İncelemek İstediğiniz Dönem (Ay / Yıl):</strong>
-    <input type="month" id="globalMonthFilter" class="form-control" style="width: auto;" onchange="renderAll()">
-  </div>
-
-  <!-- 1. GÜNLÜK HAT OPERASYONU -->
-  <div id="gunluk-operasyon" class="tab-content active">
-    <div class="grid">
-      <div class="card">
-        <h3>Günlük Ciro & Yakıt Girişi</h3>
-        <form id="dailyForm">
-          <div class="form-group">
-            <label>Tarih</label>
-            <input type="date" id="dailyDate" class="form-control" required>
-          </div>
-          <div class="form-row">
-            <div class="form-group" style="flex:1;">
-              <label>Araç Seçin</label>
-              <select id="dailyPlate" class="form-control" required></select>
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label>Şoför Seçin</label>
-              <select id="dailyDriver" class="form-control" required></select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group" style="flex:1;">
-              <label>Brüt Ciro (TL)</label>
-              <input type="number" id="dailyCiro" class="form-control" placeholder="0.00" required>
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label>Yakıt Gideri (TL)</label>
-              <input type="number" id="dailyFuel" class="form-control" placeholder="0.00" required>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%;">Kaydet</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <h3>Seçili Ayın Toplamı (Gider Cirodan Düşülmez)</h3>
-        <div class="grid" style="grid-template-columns: 1fr 1fr; margin-bottom:0;">
-          <div class="stat-box">
-            <div>Seçili Ay Brüt Ciro</div>
-            <div class="val stat-ciro" id="totalCiro">0 TL</div>
-          </div>
-          <div class="stat-box">
-            <div>Seçili Ay Yakıt Gideri</div>
-            <div class="val stat-yakit" id="totalFuel">0 TL</div>
-          </div>
+    <div class="header">
+        <h1>Minibüs Filo Yonetim Paneli</h1>
+        <div class="controls">
+            <input type="month" id="selectedMonth" onchange="renderDashboard()">
+            <button class="btn-add" onclick="openAddModal()">+ Yeni Veri Ekle</button>
         </div>
-      </div>
     </div>
 
-    <div class="card">
-      <h3>Seçili Ayın Günlük Ciro Kayıtları</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Tarih</th>
-            <th>Plaka</th>
-            <th>Şoför</th>
-            <th>Brüt Ciro</th>
-            <th>Yakıt Gideri (Ayrı)</th>
-            <th>İşlem</th>
-          </tr>
-        </thead>
-        <tbody id="dailyTableBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 2. SANAYİ & BAKIM GİDERLERİ -->
-  <div id="arac-bakim" class="tab-content">
-    <div class="grid">
-      <div class="card">
-        <h3>Sanayi / Bakım Gideri Gir</h3>
-        <form id="maintenanceForm">
-          <div class="form-group">
-            <label>Tarih</label>
-            <input type="date" id="maintDate" class="form-control" required>
-          </div>
-          <div class="form-row">
-            <div class="form-group" style="flex:1;">
-              <label>Araç Seçin</label>
-              <select id="maintPlate" class="form-control" required></select>
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label>Gider Kalemi Seçin</label>
-              <select id="maintCategory" class="form-control" required>
-                <option value="Yağ & Filtre Bakımı">Yağ & Filtre Bakımı</option>
-                <option value="Fren & Balata">Fren & Balata</option>
-                <option value="Motor & Şanzıman">Motor & Şanzıman</option>
-                <option value="Elektrik & Akü">Elektrik & Akü</option>
-                <option value="Kaporta & Boya">Kaporta & Boya</option>
-                <option value="Lastik & Jant">Lastik & Jant</option>
-                <option value="Ustalık & İşçilik">Ustalık & İşçilik</option>
-                <option value="Muayene & Evrak">Muayene & Evrak</option>
-                <option value="Diğer Sanayi Gideri">Diğer Sanayi Gideri</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Yapılan İşlem / Değişen Parça Detayı</label>
-            <input type="text" id="maintParts" class="form-control" placeholder="Örn: Yağ Değişimi, Fren Balatası Sıfırlandı" required>
-          </div>
-          <div class="form-row">
-            <div class="form-group" style="flex:1;">
-              <label>Parça Maliyeti (TL)</label>
-              <input type="number" id="maintPartCost" class="form-control" placeholder="0" required>
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label>Ustalık / İşçilik (TL)</label>
-              <input type="number" id="maintLaborCost" class="form-control" placeholder="0" required>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group" style="flex:1;">
-              <label>Usta / Servis Adı</label>
-              <input type="text" id="maintMechanic" class="form-control" placeholder="Örn: Ahmet Usta">
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label>Araç KM</label>
-              <input type="number" id="maintKm" class="form-control" placeholder="245000">
-            </div>
-          </div>
-          <button type="submit" class="btn btn-warning" style="width: 100%;">Gideri Kaydet</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <h3>Seçili Aracın Toplam Gider Defteri</h3>
-        <div class="form-group">
-          <label>Araç Seçin:</label>
-          <select id="vehicleSelect" class="form-control" onchange="renderVehicleDetails()"></select>
+    <!-- 1. KATEGORİ: CİRO VE HASILAT -->
+    <div class="category-section ciro">
+        <div class="category-title">
+            <span>1. ARAÇ CİRO VE HASILAT PANELİ</span>
         </div>
-        <div class="grid" style="grid-template-columns: 1fr 1fr; margin-top:15px;">
-          <div class="stat-box">
-            <div>Toplam Brüt Ciro</div>
-            <div class="val stat-ciro" id="vCiro">0 TL</div>
-          </div>
-          <div class="stat-box">
-            <div>Toplam Yakıt Gideri</div>
-            <div class="val stat-yakit" id="vFuel">0 TL</div>
-          </div>
-          <div class="stat-box">
-            <div>Toplam Parça Gideri</div>
-            <div class="val stat-bakim" id="vParts">0 TL</div>
-          </div>
-          <div class="stat-box">
-            <div>Toplam İşçilik Gideri</div>
-            <div class="val stat-bakim" id="vLabor">0 TL</div>
-          </div>
+        <div class="grid-4" id="ciro-grid"></div>
+        <div class="category-total" id="ciro-total">Toplam Ciro: 0 TL</div>
+    </div>
+
+    <!-- 2. KATEGORİ: AKARYAKIT GİDERLERİ -->
+    <div class="category-section yakit">
+        <div class="category-title">
+            <span>2. AKARYAKIT GİDERLERİ PANELİ</span>
         </div>
-      </div>
+        <div class="grid-4" id="yakit-grid"></div>
+        <div class="category-total" id="yakit-total">Toplam Akaryakıt: 0 TL</div>
     </div>
 
-    <div class="card">
-      <h3>Sanayi & İşlem Geçmiş Listesi</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Tarih</th>
-            <th>Araç</th>
-            <th>Gider Kalemi</th>
-            <th>İşlem / Parça</th>
-            <th>Parça TL</th>
-            <th>Ustalık TL</th>
-            <th>Usta</th>
-            <th>KM</th>
-            <th>İşlem</th>
-          </tr>
-        </thead>
-        <tbody id="maintTableBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 3. ŞOFÖR PERFORMANSI -->
-  <div id="sofor-performans" class="tab-content">
-    <div class="card">
-      <h3>Seçili Ay İçin Şoför Performans Raporu</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Şoför Adı</th>
-            <th>Çalıştığı Gün Sayısı</th>
-            <th>Toplam Topladığı Ciro (TL)</th>
-            <th>Ortalama Günlük Ciro</th>
-          </tr>
-        </thead>
-        <tbody id="driverPerfBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 4. KİŞİSEL & AİLE BÜTÇESİ -->
-  <div id="kisisel-butce" class="tab-content">
-    <div class="grid">
-      <div class="card">
-        <h3>Kişisel Gelir / Bütçe Ekle</h3>
-        <form id="personalIncomeForm">
-          <div class="form-group">
-            <label>Tarih</label>
-            <input type="date" id="pIncDate" class="form-control" required>
-          </div>
-          <div class="form-group">
-            <label>Açıklama</label>
-            <input type="text" id="pIncDesc" class="form-control" placeholder="Örn: Günlük Bütçe Ayırımı, Maaş" required>
-          </div>
-          <div class="form-group">
-            <label>Tutar (TL)</label>
-            <input type="number" id="pIncAmount" class="form-control" placeholder="1000" required>
-          </div>
-          <button type="submit" class="btn btn-success" style="width:100%;">Bütçeye Ekle</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <h3>Kişisel Gider / Taksit Ekle</h3>
-        <form id="personalExpenseForm">
-          <div class="form-group">
-            <label>Tarih</label>
-            <input type="date" id="pExpDate" class="form-control" required>
-          </div>
-          <div class="form-group">
-            <label>Gider Kalemi Seçin</label>
-            <select id="pExpCat" class="form-control" required>
-              <option value="Okul / Eğitim Taksiti">Okul / Eğitim Taksiti</option>
-              <option value="Kredi / Kredi Kartı Taksiti">Kredi / Kredi Kartı Taksiti</option>
-              <option value="Kendi Aracım Yakıt / Bakım">Kendi Aracım Yakıt / Bakım</option>
-              <option value="Ev / Mutfak / Beslenme">Ev / Mutfak / Beslenme</option>
-              <option value="Sağlık / Medikal">Sağlık / Medikal</option>
-              <option value="Diğer Kişisel Giderler">Diğer Kişisel Giderler</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Açıklama</label>
-            <input type="text" id="pExpDesc" class="form-control" placeholder="Örn: Taksit Ödemesi">
-          </div>
-          <div class="form-group">
-            <label>Tutar (TL)</label>
-            <input type="number" id="pExpAmount" class="form-control" placeholder="0" required>
-          </div>
-          <button type="submit" class="btn btn-warning" style="width:100%;">Gider Kaydet</button>
-        </form>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>Seçili Ay Kişisel Bütçe Özeti</h3>
-      <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
-        <div class="stat-box">
-          <div>Ayrılan Toplam Bütçe</div>
-          <div class="val stat-ciro" id="pTotalInc">0 TL</div>
+    <!-- 3. KATEGORİ: SANAYİ VE BAKIM GİDERLERİ -->
+    <div class="category-section sanayi">
+        <div class="category-title">
+            <span>3. SANAYİ, PARÇA VE USTA İŞÇİLİK GİDERLERİ PANELİ</span>
         </div>
-        <div class="stat-box">
-          <div>Toplam Kişisel Gider</div>
-          <div class="val stat-bakim" id="pTotalExp">0 TL</div>
+        <div class="grid-4" id="sanayi-grid"></div>
+        <div class="category-total" id="sanayi-total">Toplam Sanayi Gideri: 0 TL</div>
+    </div>
+
+    <!-- 4. KATEGORİ: VERGİ, KİRA VE DİĞER RESMİ GİDERLER -->
+    <div class="category-section sabit">
+        <div class="category-title">
+            <span>4. VERGİ, KİRA, MUHASEBE VE ODA GİDERLERİ PANELİ</span>
         </div>
-        <div class="stat-box">
-          <div>Kalan Bakiyeniz</div>
-          <div class="val" id="pNetBalance" style="color: var(--accent);">0 TL</div>
+        <div class="grid-4" id="sabit-grid"></div>
+        <div class="category-total" id="sabit-total">Toplam Resmi Giderler: 0 TL</div>
+    </div>
+
+    <!-- DETAY / DETAY MODAL -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle" style="margin: 0;">Detaylar</h3>
+                <span class="close-btn" onclick="closeModal('detailModal')">&times;</span>
+            </div>
+            <div id="modalBody"></div>
         </div>
-      </div>
-
-      <h4 style="margin-top:15px; margin-bottom:10px;">Gider & Gelir Hareketleri</h4>
-      <table>
-        <thead>
-          <tr>
-            <th>Tarih</th>
-            <th>Tür</th>
-            <th>Gider Kalemi / Açıklama</th>
-            <th>Tutar (TL)</th>
-            <th>İşlem</th>
-          </tr>
-        </thead>
-        <tbody id="personalTableBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 5. TANIMLAMALAR & YÖNETİM (ŞOFÖR VE ARAÇ EKLEME/ÇIKARMA) -->
-  <div id="tanimlamalar" class="tab-content">
-    <div class="grid">
-      <div class="card">
-        <h3>Araç (Plaka) Yönetimi</h3>
-        <form id="addVehicleForm" style="display:flex; gap:10px; margin-bottom:15px;">
-          <input type="text" id="newPlateInput" class="form-control" placeholder="Örn: 54 M 0123" required>
-          <button type="submit" class="btn btn-success">Plaka Ekle</button>
-        </form>
-        <ul id="vehicleList" class="badge-list"></ul>
-      </div>
-
-      <div class="card">
-        <h3>Şoför Yönetimi</h3>
-        <form id="addDriverForm" style="display:flex; gap:10px; margin-bottom:15px;">
-          <input type="text" id="newDriverInput" class="form-control" placeholder="Örn: Osman Usta" required>
-          <button type="submit" class="btn btn-success">Şoför Ekle</button>
-        </form>
-        <ul id="driverList" class="badge-list"></ul>
-      </div>
     </div>
 
-    <div class="card">
-      <h3>Veri Saklama & Yedekleme</h3>
-      <p style="font-size:0.9rem; color:#64748b; margin-bottom:12px;">Tüm kayıtlarınızı bilgisayarınıza indirip güvenle saklayabilir veya başka bir bilgisayara aktarabilirsiniz.</p>
-      <button class="btn btn-primary" onclick="exportData()">💾 Tüm Verileri Bilgisayara İndir (Yedek Al)</button>
+    <!-- VERİ EKLEME MODAL -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin: 0;">Yeni İşlem Kaydı</h3>
+                <span class="close-btn" onclick="closeModal('addModal')">&times;</span>
+            </div>
+            <form id="dataForm" onsubmit="saveData(event)">
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select id="formCategory" onchange="toggleFormFields()" required>
+                        <option value="ciro">Ciro / Hasılat</option>
+                        <option value="yakit">Akaryakıt</option>
+                        <option value="sanayi">Sanayi / Bakım</option>
+                        <option value="sabit">Vergi / Kira / Resmi Gider</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Araç Plaka</label>
+                    <select id="formPlaka" required>
+                        <option value="54 M 0116">54 M 0116</option>
+                        <option value="54 M 0117">54 M 0117</option>
+                        <option value="54 M 0118">54 M 0118</option>
+                        <option value="54 M 0119">54 M 0119</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tarih</label>
+                    <input type="date" id="formDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Tutar (TL)</label>
+                    <input type="number" id="formAmount" step="0.01" required>
+                </div>
+
+                <!-- Dinamik Alanlar -->
+                <div id="ciroFields">
+                    <div class="form-group">
+                        <label>Şoför Adı / Vardiya</label>
+                        <input type="text" id="formSofor" placeholder="Örn: Ahmet Usta (1. Vardiya)">
+                    </div>
+                </div>
+
+                <div id="sanayiFields" style="display: none;">
+                    <div class="form-group">
+                        <label>Yapılan İşlem / Değişen Parça</label>
+                        <input type="text" id="formIslem" placeholder="Örn: Yağ Bakımı, Triger Seti">
+                    </div>
+                    <div class="form-group">
+                        <label>Usta / Servis Adı</label>
+                        <input type="text" id="formUsta" placeholder="Örn: Öz Otomotiv Sanayi">
+                    </div>
+                </div>
+
+                <div id="sabitFields" style="display: none;">
+                    <div class="form-group">
+                        <label>Gider Türü</label>
+                        <select id="formGiderTuru">
+                            <option value="Muhasebe">Muhasebe Ücreti</option>
+                            <option value="Hat Kirası">Belediye Hat Kirası</option>
+                            <option value="Oda Aidatı">Minibüsçüler Odası Aidatı</option>
+                            <option value="MTV / Vergi">MTV / Devlet Vergisi</option>
+                            <option value="Sigorta">Sigorta / Kasko</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-add" style="width: 100%; margin-top: 15px; padding: 10px;">Kaydet</button>
+            </form>
+        </div>
     </div>
-  </div>
 
-  <script>
-    // VARSAYILAN TANIMLAMALAR VE VERİ YAPILARI
-    let vehicles = JSON.parse(localStorage.getItem('vehicles')) || ['54 M 0001', '54 M 0002'];
-    let drivers = JSON.parse(localStorage.getItem('drivers')) || ['Osman Usta', 'Ahmet Driver'];
-    
-    let dailyLogs = JSON.parse(localStorage.getItem('dailyLogs')) || [];
-    let maintLogs = JSON.parse(localStorage.getItem('maintLogs')) || [];
-    let personalLogs = JSON.parse(localStorage.getItem('personalLogs')) || [];
+    <script>
+        const vehicles = ["54 M 0116", "54 M 0117", "54 M 0118", "54 M 0119"];
+        let db = JSON.parse(localStorage.getItem('fleetDB')) || [];
 
-    // Sayfa Yükleme & Tarih Ayarları
-    const now = new Date();
-    document.getElementById('currentDate').innerText = now.toLocaleDateString('tr-TR');
-    
-    // Varsayılan Ay Süzgeci
-    const currentYearMonth = now.toISOString().slice(0, 7);
-    document.getElementById('globalMonthFilter').value = currentYearMonth;
-    document.getElementById('dailyDate').valueAsDate = now;
-    document.getElementById('maintDate').valueAsDate = now;
-    document.getElementById('pIncDate').valueAsDate = now;
-    document.getElementById('pExpDate').valueAsDate = now;
+        // Varsayılan Ay Ayarla
+        document.getElementById('selectedMonth').value = new Date().toISOString().slice(0, 7);
+        document.getElementById('formDate').value = new Date().toISOString().slice(0, 10);
 
-    // SEKME DEĞİŞTİRME
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      event.currentTarget.classList.add('active');
-      renderAll();
-    }
+        function saveData(e) {
+            e.preventDefault();
+            const newItem = {
+                id: Date.now(),
+                category: document.getElementById('formCategory').value,
+                plaka: document.getElementById('formPlaka').value,
+                date: document.getElementById('formDate').value,
+                amount: parseFloat(document.getElementById('formAmount').value),
+                sofor: document.getElementById('formSofor').value,
+                islem: document.getElementById('formIslem').value,
+                usta: document.getElementById('formUsta').value,
+                giderTuru: document.getElementById('formGiderTuru').value
+            };
 
-    // AÇILIR MENÜLERİ (DROPDOWN) GÜNCELLEME
-    function updateDropdowns() {
-      const pSelects = [document.getElementById('dailyPlate'), document.getElementById('maintPlate'), document.getElementById('vehicleSelect')];
-      pSelects.forEach(sel => {
-        if(!sel) return;
-        const currentVal = sel.value;
-        sel.innerHTML = '';
-        vehicles.forEach(v => {
-          sel.innerHTML += `<option value="${v}">${v}</option>`;
-        });
-        if(currentVal) sel.value = currentVal;
-      });
+            db.push(newItem);
+            localStorage.setItem('fleetDB', JSON.stringify(db));
+            closeModal('addModal');
+            renderDashboard();
+            document.getElementById('dataForm').reset();
+        }
 
-      const dSelect = document.getElementById('dailyDriver');
-      if(dSelect) {
-        const currentD = dSelect.value;
-        dSelect.innerHTML = '';
-        drivers.forEach(d => {
-          dSelect.innerHTML += `<option value="${d}">${d}</option>`;
-        });
-        if(currentD) dSelect.value = currentD;
-      }
-    }
+        function renderDashboard() {
+            const month = document.getElementById('selectedMonth').value;
+            const today = new Date().toISOString().slice(0, 10);
 
-    // ARAÇ & ŞOFÖR YÖNETİMİ
-    document.getElementById('addVehicleForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const val = document.getElementById('newPlateInput').value.trim().toUpperCase();
-      if(val && !vehicles.includes(val)) {
-        vehicles.push(val);
-        localStorage.setItem('vehicles', JSON.stringify(vehicles));
-        document.getElementById('newPlateInput').value = '';
-        renderManagement();
-        updateDropdowns();
-      }
-    });
+            ['ciro', 'yakit', 'sanayi', 'sabit'].forEach(cat => {
+                const grid = document.getElementById(`${cat}-grid`);
+                grid.innerHTML = '';
+                let categoryTotal = 0;
 
-    document.getElementById('addDriverForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const val = document.getElementById('newDriverInput').value.trim();
-      if(val && !drivers.includes(val)) {
-        drivers.push(val);
-        localStorage.setItem('drivers', JSON.stringify(drivers));
-        document.getElementById('newDriverInput').value = '';
-        renderManagement();
-        updateDropdowns();
-      }
-    });
+                vehicles.forEach(plaka => {
+                    const filtered = db.filter(item => 
+                        item.category === cat && 
+                        item.plaka === plaka && 
+                        item.date.startsWith(month)
+                    );
 
-    function deleteVehicle(plate) {
-      vehicles = vehicles.filter(v => v !== plate);
-      localStorage.setItem('vehicles', JSON.stringify(vehicles));
-      renderManagement();
-      updateDropdowns();
-    }
+                    const monthTotal = filtered.reduce((sum, i) => sum + i.amount, 0);
+                    categoryTotal += monthTotal;
 
-    function deleteDriver(driver) {
-      drivers = drivers.filter(d => d !== driver);
-      localStorage.setItem('drivers', JSON.stringify(drivers));
-      renderManagement();
-      updateDropdowns();
-    }
+                    let subtext = `Aylık Toplam: ${monthTotal.toLocaleString('tr-TR')} TL`;
 
-    function renderManagement() {
-      const vList = document.getElementById('vehicleList');
-      vList.innerHTML = '';
-      vehicles.forEach(v => {
-        vList.innerHTML += `<li class="badge-item">🚘 ${v} <button onclick="deleteVehicle('${v}')">✕</button></li>`;
-      });
+                    if (cat === 'ciro') {
+                        const todayTotal = filtered
+                            .filter(i => i.date === today)
+                            .reduce((sum, i) => sum + i.amount, 0);
+                        subtext = `Bugün: <b>${todayTotal.toLocaleString('tr-TR')} TL</b> <br>` + subtext;
+                    }
 
-      const dList = document.getElementById('driverList');
-      dList.innerHTML = '';
-      drivers.forEach(d => {
-        dList.innerHTML += `<li class="badge-item">👨‍✈️ ${d} <button onclick="deleteDriver('${d}')">✕</button></li>`;
-      });
-    }
+                    const card = document.createElement('div');
+                    card.className = `card ${cat}-border`;
+                    card.onclick = () => openDetailModal(cat, plaka, month);
+                    card.innerHTML = `
+                        <div class="card-plaka">${plaka}</div>
+                        <div class="card-value">${monthTotal.toLocaleString('tr-TR')} TL</div>
+                        <div class="card-subtext">${subtext}</div>
+                    `;
+                    grid.appendChild(card);
+                });
 
-    // 1. GÜNLÜK İŞLEMLER
-    document.getElementById('dailyForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const log = {
-        id: Date.now(),
-        date: document.getElementById('dailyDate').value,
-        plate: document.getElementById('dailyPlate').value,
-        driver: document.getElementById('dailyDriver').value,
-        ciro: parseFloat(document.getElementById('dailyCiro').value) || 0,
-        fuel: parseFloat(document.getElementById('dailyFuel').value) || 0
-      };
-      dailyLogs.push(log);
-      localStorage.setItem('dailyLogs', JSON.stringify(dailyLogs));
-      this.reset();
-      document.getElementById('dailyDate').valueAsDate = new Date();
-      renderAll();
-    });
+                document.getElementById(`${cat}-total`).innerText = `Toplam: ${categoryTotal.toLocaleString('tr-TR')} TL`;
+            });
+        }
 
-    // 2. SANAYİ / BAKIM İŞLEMLERİ
-    document.getElementById('maintenanceForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const log = {
-        id: Date.now(),
-        date: document.getElementById('maintDate').value,
-        plate: document.getElementById('maintPlate').value,
-        category: document.getElementById('maintCategory').value,
-        parts: document.getElementById('maintParts').value,
-        partCost: parseFloat(document.getElementById('maintPartCost').value) || 0,
-        laborCost: parseFloat(document.getElementById('maintLaborCost').value) || 0,
-        mechanic: document.getElementById('maintMechanic').value,
-        km: document.getElementById('maintKm').value
-      };
-      maintLogs.push(log);
-      localStorage.setItem('maintLogs', JSON.stringify(maintLogs));
-      this.reset();
-      document.getElementById('maintDate').valueAsDate = new Date();
-      renderAll();
-    });
+        function openDetailModal(category, plaka, month) {
+            const modalBody = document.getElementById('modalBody');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            const records = db.filter(item => 
+                item.category === category && 
+                item.plaka === plaka && 
+                item.date.startsWith(month)
+            );
 
-    // 4. KİŞİSEL BÜTÇE
-    document.getElementById('personalIncomeForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      personalLogs.push({
-        id: Date.now(),
-        type: 'GELİR',
-        date: document.getElementById('pIncDate').value,
-        category: 'Ayrılan Bütçe / Gelir',
-        desc: document.getElementById('pIncDesc').value,
-        amount: parseFloat(document.getElementById('pIncAmount').value) || 0
-      });
-      localStorage.setItem('personalLogs', JSON.stringify(personalLogs));
-      this.reset();
-      renderAll();
-    });
+            modalTitle.innerText = `${plaka} - ${category.toUpperCase()} Detayları (${month})`;
 
-    document.getElementById('personalExpenseForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      personalLogs.push({
-        id: Date.now(),
-        type: 'GİDER',
-        date: document.getElementById('pExpDate').value,
-        category: document.getElementById('pExpCat').value,
-        desc: document.getElementById('pExpDesc').value,
-        amount: parseFloat(document.getElementById('pExpAmount').value) || 0
-      });
-      localStorage.setItem('personalLogs', JSON.stringify(personalLogs));
-      this.reset();
-      renderAll();
-    });
+            if (records.length === 0) {
+                modalBody.innerHTML = '<p>Bu ay için henüz kayıt bulunmamaktadır.</p>';
+            } else {
+                let tableHTML = `<table><thead><tr><th>Tarih</th>`;
+                
+                if (category === 'ciro') tableHTML += `<th>Şoför / Vardiya</th>`;
+                if (category === 'sanayi') tableHTML += `<th>İşlem / Parça</th><th>Usta/Servis</th>`;
+                if (category === 'sabit') tableHTML += `<th>Gider Türü</th>`;
+                
+                tableHTML += `<th>Tutar</th><th>İşlem</th></tr></thead><tbody>`;
 
-    // SİLME İŞLEMLERİ
-    function deleteLog(type, id) {
-      if(type === 'daily') dailyLogs = dailyLogs.filter(l => l.id !== id);
-      if(type === 'maint') maintLogs = maintLogs.filter(l => l.id !== id);
-      if(type === 'personal') personalLogs = personalLogs.filter(l => l.id !== id);
-      
-      localStorage.setItem('dailyLogs', JSON.stringify(dailyLogs));
-      localStorage.setItem('maintLogs', JSON.stringify(maintLogs));
-      localStorage.setItem('personalLogs', JSON.stringify(personalLogs));
-      renderAll();
-    }
+                records.forEach(r => {
+                    tableHTML += `<tr>
+                        <td>${r.date}</td>
+                        ${category === 'ciro' ? `<td>${r.sofor || '-'}</td>` : ''}
+                        ${category === 'sanayi' ? `<td>${r.islem \vert{}\vert{} '-'}</td><td>${r.usta || '-'}</td>` : ''}
+                        ${category === 'sabit' ? `<td>${r.giderTuru || '-'}</td>` : ''}
+                        <td><b>${r.amount.toLocaleString('tr-TR')} TL</b></td>
+                        <td><button onclick="deleteRecord(${r.id})" style="background:#ef4444; color:white; padding:4px 8px; font-size:11px;">Sil</button></td>
+                    </tr>`;
+                });
 
-    // TÜM EKRANLARI VE RAPORLARI RENDER ETME
-    function renderAll() {
-      const selectedMonth = document.getElementById('globalMonthFilter').value;
+                tableHTML += `</tbody></table>`;
+                modalBody.innerHTML = tableHTML;
+            }
 
-      // 1. Günlük Ciro Tablosu ve Ay İstatistiği
-      const tbodyDaily = document.getElementById('dailyTableBody');
-      tbodyDaily.innerHTML = '';
-      let totCiro = 0, totFuel = 0;
+            document.getElementById('detailModal').style.display = 'flex';
+        }
 
-      dailyLogs.filter(l => l.date.startsWith(selectedMonth)).reverse().forEach(log => {
-        totCiro += log.ciro;
-        totFuel += log.fuel;
-        tbodyDaily.innerHTML += `
-          <tr>
-            <td>${log.date}</td>
-            <td><strong>${log.plate}</strong></td>
-            <td>${log.driver}</td>
-            <td style="color:var(--success); font-weight:bold;">${log.ciro.toLocaleString()} TL</td>
-            <td style="color:var(--warning); font-weight:bold;">${log.fuel.toLocaleString()} TL</td>
-            <td><button class="btn btn-danger" onclick="deleteLog('daily', ${log.id})">Sil</button></td>
-          </tr>
-        `;
-      });
-      document.getElementById('totalCiro').innerText = totCiro.toLocaleString() + ' TL';
-      document.getElementById('totalFuel').innerText = totFuel.toLocaleString() + ' TL';
+        function deleteRecord(id) {
+            if(confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
+                db = db.filter(item => item.id !== id);
+                localStorage.setItem('fleetDB', JSON.stringify(db));
+                closeModal('detailModal');
+                renderDashboard();
+            }
+        }
 
-      // 2. Sanayi / Bakım Tablosu
-      const tbodyMaint = document.getElementById('maintTableBody');
-      tbodyMaint.innerHTML = '';
-      maintLogs.filter(l => l.date.startsWith(selectedMonth)).reverse().forEach(m => {
-        tbodyMaint.innerHTML += `
-          <tr>
-            <td>${m.date}</td>
-            <td><strong>${m.plate}</strong></td>
-            <td><span style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${m.category}</span></td>
-            <td>${m.parts}</td>
-            <td>${m.partCost.toLocaleString()} TL</td>
-            <td>${m.laborCost.toLocaleString()} TL</td>
-            <td>${m.mechanic || '-'}</td>
-            <td>${m.km ? m.km + ' KM' : '-'}</td>
-            <td><button class="btn btn-danger" onclick="deleteLog('maint', ${m.id})">Sil</button></td>
-          </tr>
-        `;
-      });
+        function toggleFormFields() {
+            const cat = document.getElementById('formCategory').value;
+            document.getElementById('ciroFields').style.display = cat === 'ciro' ? 'block' : 'none';
+            document.getElementById('sanayiFields').style.display = cat === 'sanayi' ? 'block' : 'none';
+            document.getElementById('sabitFields').style.display = cat === 'sabit' ? 'block' : 'none';
+        }
 
-      renderVehicleDetails();
+        function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-      // 3. Şoför Performansı Raporu
-      const driverMap = {};
-      dailyLogs.filter(l => l.date.startsWith(selectedMonth)).forEach(l => {
-        if(!driverMap[l.driver]) driverMap[l.driver] = { totalCiro: 0, days: 0 };
-        driverMap[l.driver].totalCiro += l.ciro;
-        driverMap[l.driver].days += 1;
-      });
-
-      const tbodyPerf = document.getElementById('driverPerfBody');
-      tbodyPerf.innerHTML = '';
-      Object.keys(driverMap).forEach(d => {
-        const avg = driverMap[d].totalCiro / driverMap[d].days;
-        tbodyPerf.innerHTML += `
-          <tr>
-            <td><strong>${d}</strong></td>
-            <td>${driverMap[d].days} Gün</td>
-            <td style="color:var(--success); font-weight:bold;">${driverMap[d].totalCiro.toLocaleString()} TL</td>
-            <td>${avg.toLocaleString('tr-TR', {maximumFractionDigits: 2})} TL / Gün</td>
-          </tr>
-        `;
-      });
-
-      // 4. Kişisel Bütçe Tablosu
-      const tbodyPers = document.getElementById('personalTableBody');
-      tbodyPers.innerHTML = '';
-      let totInc = 0, totExp = 0;
-
-      personalLogs.filter(l => l.date.startsWith(selectedMonth)).reverse().forEach(p => {
-        if(p.type === 'GELİR') totInc += p.amount;
-        if(p.type === 'GİDER') totExp += p.amount;
-
-        tbodyPers.innerHTML += `
-          <tr>
-            <td>${p.date}</td>
-            <td><span style="color:${p.type==='GELİR'?'var(--success)':'var(--danger)'}; font-weight:bold;">${p.type}</span></td>
-            <td><strong>[${p.category}]</strong> ${p.desc}</td>
-            <td style="font-weight:bold;">${p.amount.toLocaleString()} TL</td>
-            <td><button class="btn btn-danger" onclick="deleteLog('personal', ${p.id})">Sil</button></td>
-          </tr>
-        `;
-      });
-
-      document.getElementById('pTotalInc').innerText = totInc.toLocaleString() + ' TL';
-      document.getElementById('pTotalExp').innerText = totExp.toLocaleString() + ' TL';
-      const net = totInc - totExp;
-      const netEl = document.getElementById('pNetBalance');
-      netEl.innerText = net.toLocaleString() + ' TL';
-      netEl.style.color = net >= 0 ? 'var(--success)' : 'var(--danger)';
-    }
-
-    function renderVehicleDetails() {
-      const selectedPlate = document.getElementById('vehicleSelect').value;
-      const selectedMonth = document.getElementById('globalMonthFilter').value;
-
-      const vDaily = dailyLogs.filter(l => l.plate === selectedPlate && l.date.startsWith(selectedMonth));
-      const vMaint = maintLogs.filter(l => l.plate === selectedPlate && l.date.startsWith(selectedMonth));
-
-      let ciro = vDaily.reduce((acc, curr) => acc + curr.ciro, 0);
-      let fuel = vDaily.reduce((acc, curr) => acc + curr.fuel, 0);
-      let parts = vMaint.reduce((acc, curr) => acc + curr.partCost, 0);
-      let labor = vMaint.reduce((acc, curr) => acc + curr.laborCost, 0);
-
-      document.getElementById('vCiro').innerText = ciro.toLocaleString() + ' TL';
-      document.getElementById('vFuel').innerText = fuel.toLocaleString() + ' TL';
-      document.getElementById('vParts').innerText = parts.toLocaleString() + ' TL';
-      document.getElementById('vLabor').innerText = labor.toLocaleString() + ' TL';
-    }
-
-    // YEDEK ALMA (VERİ İNDİRME)
-    function exportData() {
-      const data = { vehicles, drivers, dailyLogs, maintLogs, personalLogs };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `Filo_Butce_Yedek_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-    }
-
-    // İLK YÜKLEME ÇAĞRILARI
-    renderManagement();
-    updateDropdowns();
-    renderAll();
-  </script>
+        // İlk Yükleme
+        renderDashboard();
+    </script>
 </body>
-</html>      
+</html>
