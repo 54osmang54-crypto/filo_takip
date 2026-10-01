@@ -6,23 +6,36 @@
     <title>Minibüs Filo Yönetimi</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #1c2d42; }
-        h1, h2, h3 { margin: 0 0 10px 0; }
+        h1, h2, h3 { margin: 0 0 10px 0; font-size: 16px; }
         
-        /* ÜST PANEL / VERİ GİRİŞ FORMU (AÇILIR PENCERE DEĞİL, SABİT PANEL) */
+        /* TANIMLAMA PANELLERİ (ARAÇ & ŞOFÖR EKLENEN KISIM) */
+        .management-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        @media (max-width: 768px) { .management-section { grid-template-columns: 1fr; } }
+
+        .admin-panel { background: #ffffff; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); border-left: 4px solid #0284c7; }
+        .inline-form { display: flex; gap: 8px; margin-bottom: 10px; }
+        .inline-form input { flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; }
+        .btn-add { background: #0284c7; color: white; border: none; padding: 6px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        .btn-add:hover { background: #0369a1; }
+        
+        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+        .tag-del { color: #dc2626; cursor: pointer; font-weight: bold; margin-left: 4px; }
+
+        /* ÜST PANEL / VERİ GİRİŞ FORMU */
         .input-panel { background: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 4px solid #2563eb; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items: end; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; align-items: end; }
         .form-group { display: flex; flex-direction: column; }
         .form-group label { font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #475569; }
         .form-group input, .form-group select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; }
-        .btn-submit { background: #16a34a; color: white; border: none; padding: 9px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        .btn-submit { background: #16a34a; color: white; border: none; padding: 9px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; grid-column: span 1; }
         .btn-submit:hover { background: #15803d; }
 
         /* KATEGORİ VE KUTUCUK DÜZENİ */
         .category { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-        .category-header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 10px; font-weight: bold; }
+        .category-header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 10px; font-weight: bold; font-size: 14px; }
         
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        @media (max-width: 768px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+        .grid-fleet { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
 
         .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; cursor: pointer; text-align: center; }
         .card:hover { background: #e2e8f0; }
@@ -38,8 +51,8 @@
 
         .total-bar { text-align: right; font-weight: bold; font-size: 14px; margin-top: 8px; background: #f1f5f9; padding: 6px 10px; border-radius: 4px; }
 
-        /* DETAY LİSTESİ (SAYFA ALTI) */
-        .detail-panel { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: none; }
+        /* DETAY LİSTESİ */
+        .detail-panel { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: none; margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
         th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
         th { background: #f1f5f9; }
@@ -48,7 +61,28 @@
 </head>
 <body>
 
-    <!-- SABİT VERİ GİRİŞ FORMU -->
+    <!-- YÖNETİM ALANI: ARAÇ VE ŞOFÖR EKLEME/SİLME -->
+    <div class="management-section">
+        <div class="admin-panel">
+            <h3>🚗 Araç Yönetimi (Plakalar)</h3>
+            <div class="inline-form">
+                <input type="text" id="newPlaka" placeholder="Örn: 54 M 9999" style="text-transform:uppercase;">
+                <button onclick="addPlaka()" class="btn-add">Araç Ekle</button>
+            </div>
+            <div class="tag-list" id="plakaTags"></div>
+        </div>
+
+        <div class="admin-panel">
+            <h3>👤 Şoför Yönetimi</h3>
+            <div class="inline-form">
+                <input type="text" id="newSofor" placeholder="Örn: Ahmet Yılmaz">
+                <button onclick="addSofor()" class="btn-add">Şoför Ekle</button>
+            </div>
+            <div class="tag-list" id="soforTags"></div>
+        </div>
+    </div>
+
+    <!-- HIZLI VERİ GİRİŞ FORMU -->
     <div class="input-panel">
         <h3>+ Hızlı Veri Kaydı Ekle</h3>
         <form id="fastForm" onsubmit="addRecord(event)">
@@ -64,12 +98,11 @@
                 </div>
                 <div class="form-group">
                     <label>Araç Plaka</label>
-                    <select id="fPlaka" required>
-                        <option value="54 M 0116">54 M 0116</option>
-                        <option value="54 M 0117">54 M 0117</option>
-                        <option value="54 M 0118">54 M 0118</option>
-                        <option value="54 M 0119">54 M 0119</option>
-                    </select>
+                    <select id="fPlaka" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Şoför</label>
+                    <select id="fSofor"></select>
                 </div>
                 <div class="form-group">
                     <label>Tarih</label>
@@ -80,8 +113,8 @@
                     <input type="number" id="fAmount" step="0.01" placeholder="0.00" required>
                 </div>
                 <div class="form-group">
-                    <label>Açıklama / Şoför / Usta</label>
-                    <input type="text" id="fDesc" placeholder="Örn: Ahmet Usta / Yağ Bakımı / Hat Kirası">
+                    <label>Açıklama / Detay</label>
+                    <input type="text" id="fDesc" placeholder="Örn: Yağ Değişimi / Hat Kirası">
                 </div>
                 <button type="submit" class="btn-submit">KAYDET</button>
             </div>
@@ -94,28 +127,28 @@
         <input type="month" id="viewMonth" onchange="updateView()" style="padding: 6px; font-weight: bold;">
     </div>
 
-    <!-- 16 KUTUCUK (4 KATEGORİ x 4 ARAÇ) -->
+    <!-- KUTUCUKLAR (KATEGORİ X ARAÇ) -->
     <div class="category c-ciro">
         <div class="category-header">1. CİRO VE HASILAT (GÜNLÜK & AYLIK)</div>
-        <div class="grid-4" id="grid-ciro"></div>
+        <div class="grid-fleet" id="grid-ciro"></div>
         <div class="total-bar" id="tot-ciro">Ciro Toplamı: 0 TL</div>
     </div>
 
     <div class="category c-yakit">
         <div class="category-header">2. AKARYAKIT GİDERLERİ</div>
-        <div class="grid-4" id="grid-yakit"></div>
+        <div class="grid-fleet" id="grid-yakit"></div>
         <div class="total-bar" id="tot-yakit">Akaryakıt Toplamı: 0 TL</div>
     </div>
 
     <div class="category c-sanayi">
         <div class="category-header">3. SANAYİ, PARÇA VE İŞÇİLİK GİDERLERİ</div>
-        <div class="grid-4" id="grid-sanayi"></div>
+        <div class="grid-fleet" id="grid-sanayi"></div>
         <div class="total-bar" id="tot-sanayi">Sanayi Toplamı: 0 TL</div>
     </div>
 
     <div class="category c-sabit">
         <div class="category-header">4. VERGİ, KİRA, MUHASEBE VE ODA GİDERLERİ</div>
-        <div class="grid-4" id="grid-sabit"></div>
+        <div class="grid-fleet" id="grid-sabit"></div>
         <div class="total-bar" id="tot-sabit">Resmi Giderler Toplamı: 0 TL</div>
     </div>
 
@@ -129,11 +162,75 @@
     </div>
 
     <script>
-        const plakalari = ["54 M 0116", "54 M 0117", "54 M 0118", "54 M 0119"];
+        // LOKAL HAFIZA YÖNETİMİ
+        let plakalari = JSON.parse(localStorage.getItem('fleetPlakalar')) || ["54 M 0116", "54 M 0117", "54 M 0118", "54 M 0119"];
+        let soforler = JSON.parse(localStorage.getItem('fleetSoforler')) || ["Açık Şoför / Sahip", "Ahmet", "Mehmet"];
         let fleetData = JSON.parse(localStorage.getItem('fleetDataStorage')) || [];
 
         document.getElementById('fDate').value = new Date().toISOString().slice(0, 10);
         document.getElementById('viewMonth').value = new Date().toISOString().slice(0, 7);
+
+        function initLists() {
+            // Plaka Select ve Tag listesi güncelleme
+            const pSelect = document.getElementById('fPlaka');
+            const pTags = document.getElementById('plakaTags');
+            pSelect.innerHTML = '';
+            pTags.innerHTML = '';
+            
+            plakalari.forEach(p => {
+                pSelect.innerHTML += `<option value="${p}">${p}</option>`;
+                pTags.innerHTML += `<div class="tag">${p} <span class="tag-del" onclick="removePlaka('${p}')">×</span></div>`;
+            });
+
+            // Şoför Select ve Tag listesi güncelleme
+            const sSelect = document.getElementById('fSofor');
+            const sTags = document.getElementById('soforTags');
+            sSelect.innerHTML = '';
+            sTags.innerHTML = '';
+
+            soforler.forEach(s => {
+                sSelect.innerHTML += `<option value="${s}">${s}</option>`;
+                sTags.innerHTML += `<div class="tag">${s} <span class="tag-del" onclick="removeSofor('${s}')">×</span></div>`;
+            });
+
+            localStorage.setItem('fleetPlakalar', JSON.stringify(plakalari));
+            localStorage.setItem('fleetSoforler', JSON.stringify(soforler));
+            updateView();
+        }
+
+        function addPlaka() {
+            const input = document.getElementById('newPlaka');
+            const val = input.value.trim().toUpperCase();
+            if (val && !plakalari.includes(val)) {
+                plakalari.push(val);
+                input.value = '';
+                initLists();
+            }
+        }
+
+        function removePlaka(p) {
+            if (confirm(`${p} plakasını listeden çıkarmak istiyor musunuz?`)) {
+                plakalari = plakalari.filter(x => x !== p);
+                initLists();
+            }
+        }
+
+        function addSofor() {
+            const input = document.getElementById('newSofor');
+            const val = input.value.trim();
+            if (val && !soforler.includes(val)) {
+                soforler.push(val);
+                input.value = '';
+                initLists();
+            }
+        }
+
+        function removeSofor(s) {
+            if (confirm(`${s} isimli şoförü listeden çıkarmak istiyor musunuz?`)) {
+                soforler = soforler.filter(x => x !== s);
+                initLists();
+            }
+        }
 
         function addRecord(e) {
             e.preventDefault();
@@ -141,6 +238,7 @@
                 id: Date.now(),
                 cat: document.getElementById('fCat').value,
                 plaka: document.getElementById('fPlaka').value,
+                sofor: document.getElementById('fSofor').value,
                 date: document.getElementById('fDate').value,
                 amount: parseFloat(document.getElementById('fAmount').value) || 0,
                 desc: document.getElementById('fDesc').value || '-'
@@ -200,12 +298,13 @@
             title.innerText = `${plaka} - ${cat.toUpperCase()} Dökümü (${month})`;
 
             if (filtered.length === 0) {
-                container.innerHTML = '<p>Bu ay için henüz kayıt girilmemiş.</p>';
+                container.innerHTML = '<p style="padding:10px; color:#64748b;">Bu araç ve ay için henüz kayıt girilmemiş.</p>';
             } else {
-                let html = '<table><thead><tr><th>Tarih</th><th>Açıklama / Şoför / Usta</th><th>Tutar</th><th>İşlem</th></tr></thead><tbody>';
+                let html = '<table><thead><tr><th>Tarih</th><th>Şoför</th><th>Açıklama / Detay</th><th>Tutar</th><th>İşlem</th></tr></thead><tbody>';
                 filtered.forEach(item => {
                     html += `<tr>
                         <td>${item.date}</td>
+                        <td><b>${item.sofor || '-'}</b></td>
                         <td>${item.desc}</td>
                         <td><b>${item.amount.toLocaleString('tr-TR')} TL</b></td>
                         <td><button class="btn-del" onclick="deleteItem(${item.id})">Sil</button></td>
@@ -228,7 +327,8 @@
             }
         }
 
-        updateView();
+        // İlk Yükleme
+        initLists();
     </script>
 </body>
 </html>
