@@ -3,284 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minibüs Filo Yonetim Paneli</title>
+    <title>Minibüs Filo Yönetimi</title>
     <style>
-        :root {
-            --bg-color: #f4f6f9;
-            --card-bg: #ffffff;
-            --primary: #1e293b;
-            --accent-ciro: #16a34a;
-            --accent-yakit: #d97706;
-            --accent-sanayi: #dc2626;
-            --accent-sabit: #2563eb;
-            --border-radius: 10px;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 20px;
-            color: #334155;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--primary);
-            color: #fff;
-            padding: 15px 25px;
-            border-radius: var(--border-radius);
-            margin-bottom: 25px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-
-        .header h1 { margin: 0; font-size: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #1c2d42; }
+        h1, h2, h3 { margin: 0 0 10px 0; }
         
-        .controls { display: flex; gap: 15px; align-items: center; }
+        /* ÜST PANEL / VERİ GİRİŞ FORMU (AÇILIR PENCERE DEĞİL, SABİT PANEL) */
+        .input-panel { background: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 4px solid #2563eb; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items: end; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #475569; }
+        .form-group input, .form-group select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; }
+        .btn-submit { background: #16a34a; color: white; border: none; padding: 9px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        .btn-submit:hover { background: #15803d; }
+
+        /* KATEGORİ VE KUTUCUK DÜZENİ */
+        .category { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .category-header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 10px; font-weight: bold; }
         
-        select, button, input {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
-            font-weight: 600;
-        }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        @media (max-width: 768px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
 
-        button { cursor: pointer; }
+        .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; cursor: pointer; text-align: center; }
+        .card:hover { background: #e2e8f0; }
+        .card-title { font-weight: bold; font-size: 14px; color: #0f172a; }
+        .card-value { font-size: 16px; font-weight: bold; margin: 5px 0; }
+        .card-sub { font-size: 11px; color: #64748b; }
 
-        .btn-add { background-color: #10b981; color: white; border: none; padding: 10px 18px; font-size: 14px; }
-        .btn-add:hover { background-color: #059669; }
+        /* RENKLER */
+        .c-ciro .card-value { color: #16a34a; }
+        .c-yakit .card-value { color: #d97706; }
+        .c-sanayi .card-value { color: #dc2626; }
+        .c-sabit .card-value { color: #2563eb; }
 
-        .category-section {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
+        .total-bar { text-align: right; font-weight: bold; font-size: 14px; margin-top: 8px; background: #f1f5f9; padding: 6px 10px; border-radius: 4px; }
 
-        .category-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-        }
-
-        .card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-
-        .card-plaka {
-            font-weight: 800;
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: var(--primary);
-        }
-
-        .card-value {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .card-subtext {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 5px;
-        }
-
-        .ciro .card-value { color: var(--accent-ciro); }
-        .ciro-border { border-left: 5px solid var(--accent-ciro); }
-        
-        .yakit .card-value { color: var(--accent-yakit); }
-        .yakit-border { border-left: 5px solid var(--accent-yakit); }
-        
-        .sanayi .card-value { color: var(--accent-sanayi); }
-        .sanayi-border { border-left: 5px solid var(--accent-sanayi); }
-        
-        .sabit .card-value { color: var(--accent-sabit); }
-        .sabit-border { border-left: 5px solid var(--accent-sabit); }
-
-        .category-total {
-            margin-top: 15px;
-            text-align: right;
-            font-size: 16px;
-            font-weight: 800;
-            background: #f1f5f9;
-            padding: 10px 15px;
-            border-radius: 6px;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: var(--border-radius);
-            width: 90%;
-            max-width: 600px;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-
-        .close-btn {
-            font-size: 24px;
-            cursor: pointer;
-            color: #64748b;
-            font-weight: bold;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 10px;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 14px;
-        }
-
-        th { background: #f8fafc; }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
+        /* DETAY LİSTESİ (SAYFA ALTI) */
+        .detail-panel { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: none; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
+        th { background: #f1f5f9; }
+        .btn-del { background: #dc2626; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Minibüs Filo Yönetim Paneli</h1>
-        <div class="controls">
-            <input type="month" id="selectedMonth" onchange="renderDashboard()">
-            <button class="btn-add" id="openAddBtn" type="button">+ Yeni Veri Ekle</button>
-        </div>
-    </div>
-
-    <!-- 1. KATEGORİ: CİRO VE HASILAT -->
-    <div class="category-section ciro">
-        <div class="category-title">
-            <span>1. ARAÇ CİRO VE HASILAT PANELİ</span>
-        </div>
-        <div class="grid-4" id="ciro-grid"></div>
-        <div class="category-total" id="ciro-total">Toplam Ciro: 0 TL</div>
-    </div>
-
-    <!-- 2. KATEGORİ: AKARYAKIT GİDERLERİ -->
-    <div class="category-section yakit">
-        <div class="category-title">
-            <span>2. AKARYAKIT GİDERLERİ PANELİ</span>
-        </div>
-        <div class="grid-4" id="yakit-grid"></div>
-        <div class="category-total" id="yakit-total">Toplam Akaryakıt: 0 TL</div>
-    </div>
-
-    <!-- 3. KATEGORİ: SANAYİ VE BAKIM GİDERLERİ -->
-    <div class="category-section sanayi">
-        <div class="category-title">
-            <span>3. SANAYİ, PARÇA VE USTA İŞÇİLİK GİDERLERİ PANELİ</span>
-        </div>
-        <div class="grid-4" id="sanayi-grid"></div>
-        <div class="category-total" id="sanayi-total">Toplam Sanayi Gideri: 0 TL</div>
-    </div>
-
-    <!-- 4. KATEGORİ: VERGİ, KİRA VE DİĞER RESMİ GİDERLER -->
-    <div class="category-section sabit">
-        <div class="category-title">
-            <span>4. VERGİ, KİRA, MUHASEBE VE ODA GİDERLERİ PANELİ</span>
-        </div>
-        <div class="grid-4" id="sabit-grid"></div>
-        <div class="category-total" id="sabit-total">Toplam Resmi Giderler: 0 TL</div>
-    </div>
-
-    <!-- DETAY PENCERESİ -->
-    <div class="modal" id="detailModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle" style="margin: 0;">Detaylar</h3>
-                <span class="close-btn" onclick="closeModal('detailModal')">&times;</span>
-            </div>
-            <div id="modalBody"></div>
-        </div>
-    </div>
-
-    <!-- VERİ EKLEME PENCERESİ -->
-    <div class="modal" id="addModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 style="margin: 0;">Yeni İşlem Kaydı</h3>
-                <span class="close-btn" onclick="closeModal('addModal')">&times;</span>
-            </div>
-            <form id="dataForm" onsubmit="saveData(event)">
+    <!-- SABİT VERİ GİRİŞ FORMU -->
+    <div class="input-panel">
+        <h3>+ Hızlı Veri Kaydı Ekle</h3>
+        <form id="fastForm" onsubmit="addRecord(event)">
+            <div class="form-grid">
                 <div class="form-group">
                     <label>Kategori</label>
-                    <select id="formCategory" onchange="toggleFormFields()" required>
-                        <option value="ciro">Ciro / Hasılat</option>
-                        <option value="yakit">Akaryakıt</option>
-                        <option value="sanayi">Sanayi / Bakım</option>
-                        <option value="sabit">Vergi / Kira / Resmi Gider</option>
+                    <select id="fCat" required>
+                        <option value="ciro">1. Ciro / Hasılat</option>
+                        <option value="yakit">2. Akaryakıt</option>
+                        <option value="sanayi">3. Sanayi / Bakım / Parça</option>
+                        <option value="sabit">4. Vergi / Kira / Resmi Gider</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Araç Plaka</label>
-                    <select id="formPlaka" required>
+                    <select id="fPlaka" required>
                         <option value="54 M 0116">54 M 0116</option>
                         <option value="54 M 0117">54 M 0117</option>
                         <option value="54 M 0118">54 M 0118</option>
@@ -289,196 +73,162 @@
                 </div>
                 <div class="form-group">
                     <label>Tarih</label>
-                    <input type="date" id="formDate" required>
+                    <input type="date" id="fDate" required>
                 </div>
                 <div class="form-group">
                     <label>Tutar (TL)</label>
-                    <input type="number" id="formAmount" step="0.01" required placeholder="0.00">
+                    <input type="number" id="fAmount" step="0.01" placeholder="0.00" required>
                 </div>
-
-                <!-- Ciro Özel Alanları -->
-                <div id="ciroFields">
-                    <div class="form-group">
-                        <label>Şoför Adı / Vardiya</label>
-                        <input type="text" id="formSofor" placeholder="Örn: Gökhan (1. Şoför)">
-                    </div>
+                <div class="form-group">
+                    <label>Açıklama / Şoför / Usta</label>
+                    <input type="text" id="fDesc" placeholder="Örn: Ahmet Usta / Yağ Bakımı / Hat Kirası">
                 </div>
+                <button type="submit" class="btn-submit">KAYDET</button>
+            </div>
+        </form>
+    </div>
 
-                <!-- Sanayi Özel Alanları -->
-                <div id="sanayiFields" style="display: none;">
-                    <div class="form-group">
-                        <label>Yapılan İşlem / Değişen Parça</label>
-                        <input type="text" id="formIslem" placeholder="Örn: Yağ Bakımı, Triger Seti">
-                    </div>
-                    <div class="form-group">
-                        <label>Usta / Servis Adı</label>
-                        <input type="text" id="formUsta" placeholder="Örn: Öz Usta Sanayi">
-                    </div>
-                </div>
+    <!-- AY SEÇİMİ -->
+    <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+        <label><b>Görüntülenen Ay:</b></label>
+        <input type="month" id="viewMonth" onchange="updateView()" style="padding: 6px; font-weight: bold;">
+    </div>
 
-                <!-- Sabit Gider Özel Alanları -->
-                <div id="sabitFields" style="display: none;">
-                    <div class="form-group">
-                        <label>Gider Türü</label>
-                        <select id="formGiderTuru">
-                            <option value="Muhasebe">Muhasebe Ücreti</option>
-                            <option value="Hat Kirası">Belediye Hat Kirası</option>
-                            <option value="Oda Aidatı">Minibüsçüler Odası Aidatı</option>
-                            <option value="MTV / Vergi">MTV / Devlet Vergisi</option>
-                            <option value="Sigorta">Sigorta / Kasko</option>
-                        </select>
-                    </div>
-                </div>
+    <!-- 16 KUTUCUK (4 KATEGORİ x 4 ARAÇ) -->
+    <div class="category c-ciro">
+        <div class="category-header">1. CİRO VE HASILAT (GÜNLÜK & AYLIK)</div>
+        <div class="grid-4" id="grid-ciro"></div>
+        <div class="total-bar" id="tot-ciro">Ciro Toplamı: 0 TL</div>
+    </div>
 
-                <button type="submit" class="btn-add" style="width: 100%; margin-top: 15px;">Kaydet</button>
-            </form>
+    <div class="category c-yakit">
+        <div class="category-header">2. AKARYAKIT GİDERLERİ</div>
+        <div class="grid-4" id="grid-yakit"></div>
+        <div class="total-bar" id="tot-yakit">Akaryakıt Toplamı: 0 TL</div>
+    </div>
+
+    <div class="category c-sanayi">
+        <div class="category-header">3. SANAYİ, PARÇA VE İŞÇİLİK GİDERLERİ</div>
+        <div class="grid-4" id="grid-sanayi"></div>
+        <div class="total-bar" id="tot-sanayi">Sanayi Toplamı: 0 TL</div>
+    </div>
+
+    <div class="category c-sabit">
+        <div class="category-header">4. VERGİ, KİRA, MUHASEBE VE ODA GİDERLERİ</div>
+        <div class="grid-4" id="grid-sabit"></div>
+        <div class="total-bar" id="tot-sabit">Resmi Giderler Toplamı: 0 TL</div>
+    </div>
+
+    <!-- TIKLANAN KUTUCUĞUN DETAY TABLOSU -->
+    <div class="detail-panel" id="detailPanel">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 id="detailTitle">Detaylar</h3>
+            <button onclick="document.getElementById('detailPanel').style.display='none'" style="cursor:pointer;">Kapat</button>
         </div>
+        <div id="detailTable"></div>
     </div>
 
     <script>
-        const vehicles = ["54 M 0116", "54 M 0117", "54 M 0118", "54 M 0119"];
-        let db = JSON.parse(localStorage.getItem('fleetDB')) || [];
+        const plakalari = ["54 M 0116", "54 M 0117", "54 M 0118", "54 M 0119"];
+        let fleetData = JSON.parse(localStorage.getItem('fleetDataStorage')) || [];
 
-        // Sayfa yüklenince tarihleri ayarla
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById('selectedMonth').value = new Date().toISOString().slice(0, 7);
-            document.getElementById('formDate').value = new Date().toISOString().slice(0, 10);
-            
-            // Butona tıklama olayını bağla
-            document.getElementById('openAddBtn').addEventListener('click', openAddModal);
-            
-            renderDashboard();
-        });
+        document.getElementById('fDate').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('viewMonth').value = new Date().toISOString().slice(0, 7);
 
-        function saveData(e) {
+        function addRecord(e) {
             e.preventDefault();
-            const newItem = {
+            const record = {
                 id: Date.now(),
-                category: document.getElementById('formCategory').value,
-                plaka: document.getElementById('formPlaka').value,
-                date: document.getElementById('formDate').value,
-                amount: parseFloat(document.getElementById('formAmount').value) || 0,
-                sofor: document.getElementById('formSofor').value,
-                islem: document.getElementById('formIslem').value,
-                usta: document.getElementById('formUsta').value,
-                giderTuru: document.getElementById('formGiderTuru').value
+                cat: document.getElementById('fCat').value,
+                plaka: document.getElementById('fPlaka').value,
+                date: document.getElementById('fDate').value,
+                amount: parseFloat(document.getElementById('fAmount').value) || 0,
+                desc: document.getElementById('fDesc').value || '-'
             };
 
-            db.push(newItem);
-            localStorage.setItem('fleetDB', JSON.stringify(db));
-            closeModal('addModal');
-            renderDashboard();
-            document.getElementById('dataForm').reset();
-            document.getElementById('formDate').value = new Date().toISOString().slice(0, 10);
+            fleetData.push(record);
+            localStorage.setItem('fleetDataStorage', JSON.stringify(fleetData));
+            
+            document.getElementById('fAmount').value = '';
+            document.getElementById('fDesc').value = '';
+            
+            updateView();
         }
 
-        function renderDashboard() {
-            const month = document.getElementById('selectedMonth').value;
+        function updateView() {
+            const currentMonth = document.getElementById('viewMonth').value;
             const today = new Date().toISOString().slice(0, 10);
 
             ['ciro', 'yakit', 'sanayi', 'sabit'].forEach(cat => {
-                const grid = document.getElementById(`${cat}-grid`);
-                grid.innerHTML = '';
-                let categoryTotal = 0;
+                const gridDiv = document.getElementById(`grid-${cat}`);
+                gridDiv.innerHTML = '';
+                let catSum = 0;
 
-                vehicles.forEach(plaka => {
-                    const filtered = db.filter(item => 
-                        item.category === cat && 
-                        item.plaka === plaka && 
-                        item.date && item.date.startsWith(month)
-                    );
+                plakalari.forEach(plaka => {
+                    const items = fleetData.filter(x => x.cat === cat && x.plaka === plaka && x.date.startsWith(currentMonth));
+                    const sumMonth = items.reduce((a, b) => a + b.amount, 0);
+                    catSum += sumMonth;
 
-                    const monthTotal = filtered.reduce((sum, i) => sum + i.amount, 0);
-                    categoryTotal += monthTotal;
-
-                    let subtext = `Aylık Toplam: ${monthTotal.toLocaleString('tr-TR')} TL`;
-
+                    let subText = `Aylık: ${sumMonth.toLocaleString('tr-TR')} TL`;
                     if (cat === 'ciro') {
-                        const todayTotal = filtered
-                            .filter(i => i.date === today)
-                            .reduce((sum, i) => sum + i.amount, 0);
-                        subtext = `Bugün: <b>${todayTotal.toLocaleString('tr-TR')} TL</b> <br>` + subtext;
+                        const sumToday = items.filter(x => x.date === today).reduce((a, b) => a + b.amount, 0);
+                        subText = `Bugün: <b>${sumToday.toLocaleString('tr-TR')} TL</b><br>` + subText;
                     }
 
                     const card = document.createElement('div');
-                    card.className = `card ${cat}-border`;
-                    card.onclick = () => openDetailModal(cat, plaka, month);
+                    card.className = 'card';
+                    card.onclick = () => showDetail(cat, plaka, currentMonth);
                     card.innerHTML = `
-                        <div class="card-plaka">${plaka}</div>
-                        <div class="card-value">${monthTotal.toLocaleString('tr-TR')} TL</div>
-                        <div class="card-subtext">${subtext}</div>
+                        <div class="card-title">${plaka}</div>
+                        <div class="card-value">${sumMonth.toLocaleString('tr-TR')} TL</div>
+                        <div class="card-sub">${subText}</div>
                     `;
-                    grid.appendChild(card);
+                    gridDiv.appendChild(card);
                 });
 
-                document.getElementById(`${cat}-total`).innerText = `Toplam: ${categoryTotal.toLocaleString('tr-TR')} TL`;
+                document.getElementById(`tot-${cat}`).innerText = `Kategori Toplamı: ${catSum.toLocaleString('tr-TR')} TL`;
             });
         }
 
-        function openDetailModal(category, plaka, month) {
-            const modalBody = document.getElementById('modalBody');
-            const modalTitle = document.getElementById('modalTitle');
-            
-            const records = db.filter(item => 
-                item.category === category && 
-                item.plaka === plaka && 
-                item.date && item.date.startsWith(month)
-            );
+        function showDetail(cat, plaka, month) {
+            const panel = document.getElementById('detailPanel');
+            const title = document.getElementById('detailTitle');
+            const container = document.getElementById('detailTable');
 
-            modalTitle.innerText = `${plaka} - ${category.toUpperCase()} Detayları (${month})`;
+            const filtered = fleetData.filter(x => x.cat === cat && x.plaka === plaka && x.date.startsWith(month));
 
-            if (records.length === 0) {
-                modalBody.innerHTML = '<p style="padding:10px;">Bu ay için henüz kayıt bulunmamaktadır.</p>';
+            title.innerText = `${plaka} - ${cat.toUpperCase()} Dökümü (${month})`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p>Bu ay için henüz kayıt girilmemiş.</p>';
             } else {
-                let tableHTML = `<table><thead><tr><th>Tarih</th>`;
-                
-                if (category === 'ciro') tableHTML += `<th>Şoför / Vardiya</th>`;
-                if (category === 'sanayi') tableHTML += `<th>İşlem / Parça</th><th>Usta/Servis</th>`;
-                if (category === 'sabit') tableHTML += `<th>Gider Türü</th>`;
-                
-                tableHTML += `<th>Tutar</th><th>İşlem</th></tr></thead><tbody>`;
-
-                records.forEach(r => {
-                    tableHTML += `<tr>
-                        <td>${r.date}</td>
-                        ${category === 'ciro' ? `<td>${r.sofor || '-'}</td>` : ''}
-                        ${category === 'sanayi' ? `<td>${r.islem \vert{}\vert{} '-'}</td><td>${r.usta || '-'}</td>` : ''}
-                        ${category === 'sabit' ? `<td>${r.giderTuru || '-'}</td>` : ''}
-                        <td><b>${r.amount.toLocaleString('tr-TR')} TL</b></td>
-                        <td><button onclick="deleteRecord(${r.id})" style="background:#ef4444; color:white; border:none; padding:4px 8px; font-size:11px; border-radius:4px;">Sil</button></td>
+                let html = '<table><thead><tr><th>Tarih</th><th>Açıklama / Şoför / Usta</th><th>Tutar</th><th>İşlem</th></tr></thead><tbody>';
+                filtered.forEach(item => {
+                    html += `<tr>
+                        <td>${item.date}</td>
+                        <td>${item.desc}</td>
+                        <td><b>${item.amount.toLocaleString('tr-TR')} TL</b></td>
+                        <td><button class="btn-del" onclick="deleteItem(${item.id})">Sil</button></td>
                     </tr>`;
                 });
-
-                tableHTML += `</tbody></table>`;
-                modalBody.innerHTML = tableHTML;
+                html += '</tbody></table>';
+                container.innerHTML = html;
             }
 
-            document.getElementById('detailModal').style.display = 'flex';
+            panel.style.display = 'block';
+            panel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function deleteRecord(id) {
-            if(confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
-                db = db.filter(item => item.id !== id);
-                localStorage.setItem('fleetDB', JSON.stringify(db));
-                closeModal('detailModal');
-                renderDashboard();
+        function deleteItem(id) {
+            if (confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
+                fleetData = fleetData.filter(x => x.id !== id);
+                localStorage.setItem('fleetDataStorage', JSON.stringify(fleetData));
+                document.getElementById('detailPanel').style.display = 'none';
+                updateView();
             }
         }
 
-        function toggleFormFields() {
-            const cat = document.getElementById('formCategory').value;
-            document.getElementById('ciroFields').style.display = cat === 'ciro' ? 'block' : 'none';
-            document.getElementById('sanayiFields').style.display = cat === 'sanayi' ? 'block' : 'none';
-            document.getElementById('sabitFields').style.display = cat === 'sabit' ? 'block' : 'none';
-        }
-
-        function openAddModal() {
-            document.getElementById('addModal').style.display = 'flex';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
+        updateView();
     </script>
 </body>
 </html>
